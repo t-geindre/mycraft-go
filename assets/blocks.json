@@ -1,0 +1,16 @@
+{
+    "green_grass": {
+        "sides": "assets/blocks/greeen_grass_side.png",
+        "top": "assets/blocks/grass.png",
+        "bottom": "assets/blocks/dirt.png"
+    },
+    "dirt": {
+        "all": "assets/blocks/dirt.png"
+    },
+    "sand": {
+        "all": "assets/blocks/sand.png"
+    },
+    "stone": {
+        "all": "assets/blocks/stone.png"
+    }
+}
