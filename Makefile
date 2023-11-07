@@ -1,7 +1,7 @@
 MODULE_NAME=${shell cat go.mod | grep module | awk '{print $$2}' }
 
 build:
-	mkdir bin
+	mkdir -p bin
 	export CGO_ENABLED=1
 	go build -o bin/${MODULE_NAME}
 
