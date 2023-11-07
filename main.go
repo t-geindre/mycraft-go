@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strings"
 	"time"
 
@@ -24,6 +25,8 @@ func main() {
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
 
+	//	a.Gls().Enable(gls.MULTISAMPLE)
+
 	// Set the scene to be managed by the gui manager
 	gui.Manager().Set(scene)
 
@@ -46,8 +49,15 @@ func main() {
 		scene.Add(blocks[currentBlock])
 	}
 
+	blockNames := make([]string, 0, len(blocks))
+	for name := range blocks {
+		blockNames = append(blockNames, name)
+	}
+	sort.Strings(blockNames)
+	currentBlock = blockNames[0]
+
 	var btnSpacing float32 = 0.0
-	for blockName := range blocks {
+	for _, blockName := range blockNames {
 		blockLabel := strings.Replace(blockName, "_", " ", -1)
 		blockLabel = strings.ToUpper(blockLabel)
 
@@ -63,8 +73,6 @@ func main() {
 		}(blockName))
 
 		scene.Add(btn)
-
-		currentBlock = blockName
 	}
 
 	setCurrentBlock(currentBlock)
@@ -83,20 +91,15 @@ func main() {
 	// Create and add lights to the scene
 	scene.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8))
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition(1, 0, 2)
+	pointLight.SetPosition(1, -1, 2)
 	scene.Add(pointLight)
 
 	// Set background color to gray
-	a.Gls().ClearColor(0, 0, 0, 1.0)
-
-	/*
-		for blockName, blockMesh := range blocks {
-			btn = gui.Ne
-		}
-	*/
+	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Run the application
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
+
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
 	})

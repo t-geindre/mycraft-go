@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/g3n/engine/geometry"
+	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
@@ -56,6 +57,13 @@ func LoadBlocks() map[string]*graphic.Mesh {
 			blocks[blockName].AddMaterial(getMaterial(blockDefinition.Top), BLOCk_FACE_TOP, 6)
 			continue
 		}
+
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Back), BLOCk_FACE_BACK, 6)
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Front), BLOCk_FACE_FRONT, 6)
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Left), BLOCk_FACE_LEFT, 6)
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Right), BLOCk_FACE_RIGHT, 6)
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Bottom), BLOCk_FACE_BOTTOM, 6)
+		blocks[blockName].AddMaterial(getMaterial(blockDefinition.Top), BLOCk_FACE_TOP, 6)
 	}
 
 	return blocks
@@ -82,15 +90,20 @@ func getMaterial(textureFile string) *material.Standard {
 	}
 
 	fmt.Printf("Loading texture \"%s\"....", textureFile)
-	texture, err := texture.NewTexture2DFromImage(textureFile)
+	materialTexture, err := texture.NewTexture2DFromImage(textureFile)
 	if err != nil {
 		panic(err)
 	}
+	materialTexture.SetMagFilter(gls.NEAREST) // No blury upscale
 
 	fmt.Println("DONE")
 
-	material := material.NewStandard(math32.NewColor("White"))
-	material.AddTexture(texture)
+	color := math32.NewColor("White")
+	if textureFile == "assets/block/grass_block_top.png" { // todo fix this
+		color = &math32.Color{R: .66, G: .99, B: .59} // top grass color
+	}
+	material := material.NewStandard(color)
+	material.AddTexture(materialTexture)
 	materials[textureFile] = material
 
 	return material
