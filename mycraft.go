@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/g3n/engine/graphic"
+	"github.com/g3n/engine/util"
 	"mycraft/block"
 	"mycraft/material"
 	"sort"
@@ -25,6 +27,7 @@ func main() {
 	a := app.App()
 	scene := core.NewNode()
 
+	// Window setup
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
 
@@ -88,13 +91,20 @@ func main() {
 		scene.Add(btn)
 	}
 
+	// Framerate control/display
+	framerater := util.NewFrameRater(60)
+	label := gui.NewLabel("0")
+	scene.Add(label)
+
 	// Set up callback to update viewport and camera aspect ratio when the window is resized
 	onResize := func(evname string, ev interface{}) {
 		// Get framebuffer size and update viewport accordingly
-		width, height := a.GetSize()
-		a.Gls().Viewport(0, 0, int32(width), int32(height))
+		wWidth, wHeight := a.GetSize()
+		a.Gls().Viewport(0, 0, int32(wWidth), int32(wHeight))
 		// Update the camera's aspect ratio
-		cam.SetAspect(float32(width) / float32(height))
+		cam.SetAspect(float32(wWidth) / float32(wHeight))
+		// Update fps display position
+		label.SetPosition(float32(wWidth)-30, 10)
 	}
 	a.Subscribe(window.OnWindowSize, onResize)
 	onResize("", nil)
@@ -110,8 +120,15 @@ func main() {
 
 	// Run the application
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
+		framerater.Start()
+
+		fps, _, ok := framerater.FPS(deltaTime)
+		if ok {
+			label.SetText(fmt.Sprintf("%d", int(fps)))
+		}
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
+		framerater.Wait()
 	})
 }
