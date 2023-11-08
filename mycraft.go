@@ -1,7 +1,9 @@
 package main
 
 import (
-	"mycraft/internal/material"
+	"github.com/g3n/engine/graphic"
+	"mycraft/block"
+	"mycraft/material"
 	"sort"
 	"strings"
 	"time"
@@ -18,9 +20,6 @@ import (
 )
 
 func main() {
-
-	materialRepository := material.CreateFromYamlFile("assets/materials.yaml")
-	_ = materialRepository
 
 	// Create application and scene
 	a := app.App()
@@ -42,29 +41,34 @@ func main() {
 	// Set up orbit control for the camera
 	camera.NewOrbitControl(cam)
 
-	// Load blocks
-	blocks := LoadBlocks()
+	// Load materials and blocks
+	materialRepository := material.CreateFromYamlFile("assets/materials.yaml")
+	blocksRepository := block.CreateFromYAMLFile("assets/blocks.yaml", materialRepository)
 
-	// Blocks controls
-	var currentBlock string
-	setCurrentBlock := func(newBlock string) {
-		scene.Remove(blocks[currentBlock])
-		currentBlock = newBlock
-		scene.Add(blocks[currentBlock])
-		blocks[currentBlock].SetPosition(0, 0, 0)
+	// Current block switcher
+	var currentBlock *graphic.Mesh
+	setCurrentBlock := func(id string) {
+		scene.Remove(currentBlock)
+		currentBlock = blocksRepository.Get(id).CreateMesh()
+		currentBlock.SetPosition(0, 0, 0)
+		scene.Add(currentBlock)
 	}
 
-	blockNames := make([]string, 0, len(blocks))
-	for name := range blocks {
-		blockNames = append(blockNames, name)
+	// Create sorted blocks list
+	blockIds := make([]string, 0, len(blocksRepository.Blocks))
+	for name := range blocksRepository.Blocks {
+		blockIds = append(blockIds, name)
 	}
-	sort.Strings(blockNames)
-	currentBlock = blockNames[0]
+	sort.Strings(blockIds)
 
+	// First sorted block set as default
+	setCurrentBlock(blockIds[0])
+
+	// GUI
 	_, height := a.GetSize()
-	btnSpacing := float32(height / len(blockNames))
+	btnSpacing := float32(height / len(blockIds))
 
-	for idx, blockName := range blockNames {
+	for idx, blockName := range blockIds {
 		blockLabel := strings.Replace(blockName, "_", " ", -1)
 		blockLabel = strings.ToUpper(blockLabel)
 
@@ -72,16 +76,17 @@ func main() {
 		btn.SetPosition(0, btnSpacing*float32(idx))
 		btn.SetSize(150, btnSpacing)
 
-		btn.Subscribe(gui.OnClick, func(blockName string) func(name string, ev interface{}) {
-			return func(name string, ev interface{}) {
-				setCurrentBlock(blockName)
-			}
-		}(blockName))
+		btn.Subscribe(
+			gui.OnClick,
+			func(blockName string) func(name string, ev interface{}) {
+				return func(_ string, _ interface{}) {
+					setCurrentBlock(blockName)
+				}
+			}(blockName),
+		)
 
 		scene.Add(btn)
 	}
-
-	setCurrentBlock(currentBlock)
 
 	// Set up callback to update viewport and camera aspect ratio when the window is resized
 	onResize := func(evname string, ev interface{}) {

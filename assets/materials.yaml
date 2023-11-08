@@ -69,4 +69,3 @@ tnt_side:
     texture: assets/block/tnt_side.png
 tnt_top:
     texture: assets/block/tnt_top.png
-

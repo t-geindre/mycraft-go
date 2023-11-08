@@ -1,0 +1,83 @@
+# block_id:
+#     materials:
+#         all: material_id # is applied to all faces
+#         sides: material_id # applied to left, right, front and back faces
+#         top: material_id
+#         left: material_id
+#         right: material_id
+#         front: material_id
+#         back: material_id
+
+green_grass:
+    materials:
+        sides: grass_side
+        top: grass_top
+        bottom: dirt
+dirt:
+    materials:
+        all: dirt
+sand:
+    materials:
+        all: sand
+stone:
+    materials:
+        all: stone
+smitting_table:
+    materials:
+        front: smithing_table_front
+        left: smithing_table_side
+        right: smithing_table_side
+        back: smithing_table_front
+        top: smithing_table_top
+        bottom: smithing_table_bottom
+smooth_basalt:
+    materials:
+      all: smooth_basalt
+tnt:
+    materials:
+        bottom: tnt_bottom
+        sides: tnt_side
+        top: tnt_top
+andesite:
+    materials:
+        all: andesite
+barrel:
+    materials:
+        top: barrel_top
+        sides: barrel_side
+        bottom: barrel_bottom
+stone_brick:
+    materials:
+        all: stone_bricks
+spruce_log:
+    materials:
+        sides: spruce_log_side
+        top: spruce_log_top
+        bottom: spruce_log_top
+snow:
+    materials:
+        all: snow
+soul_sand:
+    materials:
+        all: soul_sand
+packed_ice:
+    materials:
+        all: packed_ice
+oak_plank:
+    materials:
+        all: oak_planks
+netherrack:
+    materials:
+        all: netherrack
+iron_ore:
+    materials:
+        all: iron_ore
+diamond_block:
+    materials:
+        all: diamond_block
+diamond_ore:
+    materials:
+        all: diamond_ore
+bedrock:
+    materials:
+        all: bedrock
