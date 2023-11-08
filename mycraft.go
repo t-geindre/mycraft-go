@@ -1,6 +1,7 @@
 package main
 
 import (
+	"mycraft/internal/material"
 	"sort"
 	"strings"
 	"time"
@@ -18,8 +19,8 @@ import (
 
 func main() {
 
-	materials := Materials{}
-	materials.LoadFromYamlFile("assets/materials.yaml")
+	materialRepository := material.CreateFromYamlFile("assets/materials.yaml")
+	_ = materialRepository
 
 	// Create application and scene
 	a := app.App()
@@ -50,6 +51,7 @@ func main() {
 		scene.Remove(blocks[currentBlock])
 		currentBlock = newBlock
 		scene.Add(blocks[currentBlock])
+		blocks[currentBlock].SetPosition(0, 0, 0)
 	}
 
 	blockNames := make([]string, 0, len(blocks))
@@ -59,15 +61,16 @@ func main() {
 	sort.Strings(blockNames)
 	currentBlock = blockNames[0]
 
-	var btnSpacing float32 = 0.0
-	for _, blockName := range blockNames {
+	_, height := a.GetSize()
+	btnSpacing := float32(height / len(blockNames))
+
+	for idx, blockName := range blockNames {
 		blockLabel := strings.Replace(blockName, "_", " ", -1)
 		blockLabel = strings.ToUpper(blockLabel)
 
 		btn := gui.NewButton(blockLabel)
-		btn.SetPosition(0, btnSpacing)
-		btn.SetSize(150, 30)
-		btnSpacing += 30
+		btn.SetPosition(0, btnSpacing*float32(idx))
+		btn.SetSize(150, btnSpacing)
 
 		btn.Subscribe(gui.OnClick, func(blockName string) func(name string, ev interface{}) {
 			return func(name string, ev interface{}) {

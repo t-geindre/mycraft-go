@@ -4,13 +4,69 @@
 #     color3: { r: 1, g: 1, b: 1 } # default { r: 1, g: 1, b: 1 }, ignored if color is specified
 #     specularColor: white
 #     specularColor3: { r: 0.5, g: 0.5, b: 0.5 }  # default { r: 0.5, g: 0.5, b: 0.5 }, ignored if color is specified
-#     emissiveColor": "white",
+#     emissiveColor: "white",
 #     emissiveColor3: { r: 0, g: 0, b: 0 }  # default { r: 0, g: 0, b: 0 }, ignored if emissiveColor is specified
 #     shininess: 30.0 # default 30.0
 #     opacity: 1.0 # default 1
 #     texture: "" # default ""
 
-grass_green:
-    color: green
+andesite:
+    texture: assets/block/andesite.png
+barrel_side:
+    texture: assets/block/barrel_side.png
+barrel_bottom:
+    texture: assets/block/barrel_bottom.png
+barrel_top:
+    texture: assets/block/barrel_top.png
+bedrock:
+    texture: assets/block/bedrock.png
+diamond_block:
+    texture: assets/block/diamond_block.png
+diamond_ore:
+    texture: assets/block/diamond_ore.png
+dirt:
+    texture: assets/block/dirt.png
+grass_top:
     color3: { r: 0.66, g: 0.99, b: 0.59 }
     texture: assets/block/grass_block_top.png
+grass_side:
+    texture: assets/block/grass_block_side.png
+iron_ore:
+    texture: assets/block/iron_ore.png
+netherrack:
+    texture: assets/block/netherrack.png
+oak_planks:
+    texture: assets/block/oak_planks.png
+packed_ice:
+    texture: assets/block/packed_ice.png
+sand:
+    texture: assets/block/sand.png
+smithing_table_bottom:
+    texture: assets/block/smithing_table_bottom.png
+smithing_table_front:
+    texture: assets/block/smithing_table_front.png
+smithing_table_side:
+    texture: assets/block/smithing_table_side.png
+smithing_table_top:
+    texture: assets/block/smithing_table_top.png
+smooth_basalt:
+    texture: assets/block/smooth_basalt.png
+snow:
+    texture: assets/block/snow.png
+soul_sand:
+    texture: assets/block/soul_sand.png
+spruce_log_side:
+    texture: assets/block/spruce_log.png
+spruce_log_top:
+    texture: assets/block/spruce_log_top.png
+stone:
+    texture: assets/block/stone.png
+stone_bricks:
+    texture: assets/block/stone_bricks.png
+tnt_bottom:
+    texture: assets/block/tnt_bottom.png
+tnt_side:
+    texture: assets/block/tnt_side.png
+tnt_top:
+    texture: assets/block/tnt_top.png
+
