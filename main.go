@@ -18,6 +18,9 @@ import (
 
 func main() {
 
+	materials := Materials{}
+	materials.LoadFromYamlFile("assets/materials.yaml")
+
 	// Create application and scene
 	a := app.App()
 	scene := core.NewNode()

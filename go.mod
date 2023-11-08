@@ -1,4 +1,4 @@
-module terrain
+module mycraft
 
 go 1.21.1
 

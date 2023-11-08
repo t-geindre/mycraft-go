@@ -1,0 +1,16 @@
+# # all material fields are otpionals
+# default:
+#     color: white
+#     color3: { r: 1, g: 1, b: 1 } # default { r: 1, g: 1, b: 1 }, ignored if color is specified
+#     specularColor: white
+#     specularColor3: { r: 0.5, g: 0.5, b: 0.5 }  # default { r: 0.5, g: 0.5, b: 0.5 }, ignored if color is specified
+#     emissiveColor": "white",
+#     emissiveColor3: { r: 0, g: 0, b: 0 }  # default { r: 0, g: 0, b: 0 }, ignored if emissiveColor is specified
+#     shininess: 30.0 # default 30.0
+#     opacity: 1.0 # default 1
+#     texture: "" # default ""
+
+grass_green:
+    color: green
+    color3: { r: 0.66, g: 0.99, b: 0.59 }
+    texture: assets/block/grass_block_top.png
