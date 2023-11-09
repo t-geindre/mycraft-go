@@ -31,10 +31,6 @@ func main() {
 	// Window setup
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
-	/*
-		glWindow.SetCursorPos(100, 100)
-
-	*/
 
 	// Set the scene to be managed by the gui manager
 	gui.Manager().Set(scene)
@@ -57,12 +53,9 @@ func main() {
 	var currentBlock *graphic.Mesh
 	setCurrentBlock := func(id string) {
 		scene.Remove(currentBlock)
-		for i := 0; i < 10; i++ {
-			currentBlock = blocksRepository.Get(id).CreateMesh()
-			currentBlock.SetPosition(float32(i*(1+i%2)), float32(i*i%2), 1)
-			scene.Add(currentBlock)
-		}
-		// currentBlock.SetPosition(0, 0, 0)
+		currentBlock = blocksRepository.Get(id).CreateMesh()
+		scene.Add(currentBlock)
+		currentBlock.SetPosition(0, 0, 0)
 	}
 
 	// Create sorted blocks list
@@ -100,6 +93,23 @@ func main() {
 
 		scene.Add(btn)
 	}
+
+	controlEnabled := false
+	gui.Manager().Subscribe(window.OnKeyDown, func(_ string, ev any) {
+		kev := ev.(*window.KeyEvent)
+		if kev.Key != window.KeyEscape {
+			return
+		}
+
+		if !controlEnabled {
+			WASMControl.ReleaseMouse()
+			controlEnabled = true
+			return
+		}
+		WASMControl.CaptureMouse(glWindow)
+		controlEnabled = false
+
+	})
 
 	// Framerate control/display
 	framerater := util.NewFrameRater(60)
