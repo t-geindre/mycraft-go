@@ -73,7 +73,7 @@ func (r *Repository) AppendFromYAMLFile(filePath string) {
 	}
 }
 
-func CreateFromYAMLFile(filePath string, materials material.Repository) Repository {
+func NewFromYAMLFile(filePath string, materials material.Repository) Repository {
 	repository := Repository{
 		Blocks:    map[string]Block{},
 		Materials: materials,

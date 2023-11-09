@@ -5,13 +5,14 @@ import (
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
+	"mycraft/camera"
 	"mycraft/material"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/g3n/engine/app"
-	"github.com/g3n/engine/camera"
+	g3ncamera "github.com/g3n/engine/camera"
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/gui"
@@ -31,22 +32,21 @@ func main() {
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
 
-	//	a.Gls().Enable(gls.MULTISAMPLE)
-
 	// Set the scene to be managed by the gui manager
 	gui.Manager().Set(scene)
 
 	// Create perspective camera
-	cam := camera.New(1)
+	cam := g3ncamera.New(1)
 	cam.SetPosition(0, 0, 3)
 	scene.Add(cam)
 
 	// Set up orbit control for the camera
-	camera.NewOrbitControl(cam)
+	//g3ncamera.NewOrbitControl(cam)
+	FPSControl := camera.NewFPSControl(cam)
 
 	// Load materials and blocks
-	materialRepository := material.CreateFromYamlFile("assets/materials.yaml")
-	blocksRepository := block.CreateFromYAMLFile("assets/blocks.yaml", materialRepository)
+	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
+	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
 
 	// Current block switcher
 	var currentBlock *graphic.Mesh
@@ -84,6 +84,8 @@ func main() {
 			func(blockName string) func(name string, ev interface{}) {
 				return func(_ string, _ interface{}) {
 					setCurrentBlock(blockName)
+					// remove button focus to get window events
+					gui.Manager().SetKeyFocus(nil)
 				}
 			}(blockName),
 		)
@@ -127,8 +129,11 @@ func main() {
 			label.SetText(fmt.Sprintf("%d", int(fps)))
 		}
 
+		FPSControl.Update(deltaTime)
+
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
+
 		framerater.Wait()
 	})
 }

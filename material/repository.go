@@ -54,7 +54,7 @@ func (r *Repository) AppendFromYamlFile(filePath string) {
 	}
 }
 
-func CreateFromYamlFile(filePath string) Repository {
+func NewFromYamlFile(filePath string) Repository {
 	repository := Repository{
 		map[string]*material.Standard{},
 		map[string]*texture.Texture2D{},
