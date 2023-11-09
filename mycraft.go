@@ -139,6 +139,7 @@ func main() {
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Run the application
+	rotation := float32(0)
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		framerater.Start()
 
@@ -151,6 +152,9 @@ func main() {
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
+
+		rotation += float32(deltaTime.Milliseconds()) / 1000
+		currentBlock.SetRotation(rotation, rotation/2, 0)
 
 		framerater.Wait()
 	})
