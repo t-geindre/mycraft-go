@@ -132,11 +132,22 @@ func main() {
 	// Create and add lights to the scene
 	scene.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8))
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition(1, -1, 2)
+	pointLight.SetPosition(1, -2, 2)
 	scene.Add(pointLight)
 
 	// Set background color to gray
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
+
+	// Grass plan
+	grassBlock := blocksRepository.Get("green_grass")
+	grassPlanSize := float32(10)
+	for i := -grassPlanSize; i < grassPlanSize; i++ {
+		for j := -grassPlanSize; j < grassPlanSize; j++ {
+			blockMesh := grassBlock.CreateMesh()
+			blockMesh.SetPosition(i, -2, j)
+			scene.Add(blockMesh)
+		}
+	}
 
 	// Run the application
 	rotation := float32(0)
