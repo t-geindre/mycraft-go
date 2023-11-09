@@ -31,6 +31,10 @@ func main() {
 	// Window setup
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
+	/*
+		glWindow.SetCursorPos(100, 100)
+
+	*/
 
 	// Set the scene to be managed by the gui manager
 	gui.Manager().Set(scene)
@@ -42,7 +46,8 @@ func main() {
 
 	// Set up orbit control for the camera
 	//g3ncamera.NewOrbitControl(cam)
-	FPSControl := camera.NewFPSControl(cam)
+	WASMControl := camera.NewWASMControl(cam)
+	WASMControl.CaptureMouse(glWindow)
 
 	// Load materials and blocks
 	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
@@ -52,9 +57,12 @@ func main() {
 	var currentBlock *graphic.Mesh
 	setCurrentBlock := func(id string) {
 		scene.Remove(currentBlock)
-		currentBlock = blocksRepository.Get(id).CreateMesh()
-		currentBlock.SetPosition(0, 0, 0)
-		scene.Add(currentBlock)
+		for i := 0; i < 10; i++ {
+			currentBlock = blocksRepository.Get(id).CreateMesh()
+			currentBlock.SetPosition(float32(i*(1+i%2)), float32(i*i%2), 1)
+			scene.Add(currentBlock)
+		}
+		// currentBlock.SetPosition(0, 0, 0)
 	}
 
 	// Create sorted blocks list
@@ -129,7 +137,7 @@ func main() {
 			label.SetText(fmt.Sprintf("%d", int(fps)))
 		}
 
-		FPSControl.Update(deltaTime)
+		WASMControl.Update(deltaTime)
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
