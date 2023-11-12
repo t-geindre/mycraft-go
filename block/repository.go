@@ -39,7 +39,7 @@ func (r *Repository) AppendFromYAMLFile(filePath string) {
 		case "plant":
 			meshes = r.createPlantMeshes(def)
 		default:
-			meshes = r.createBlockMeshes(def)
+			meshes = r.createCubeMeshes(def)
 		}
 		r.Blocks[id] = Block{
 			Id:     id,
@@ -59,7 +59,7 @@ func NewFromYAMLFile(filePath string, materials material.Repository) Repository 
 	return repository
 }
 
-func (r *Repository) createBlockMeshes(def _YAMLBlock) []*graphic.Mesh {
+func (r *Repository) createCubeMeshes(def _YAMLBlock) []*graphic.Mesh {
 	mesh := graphic.NewMesh(geometry.NewCube(1), nil)
 
 	if len(def.Materials.All) > 0 {

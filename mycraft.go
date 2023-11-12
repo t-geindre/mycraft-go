@@ -41,14 +41,35 @@ func main() {
 	scene.Add(cam)
 
 	// Set up orbit control for the camera
-	//g3ncamera.NewOrbitControl(cam)
 	WASMControl := camera.NewWASMControl(cam)
 	WASMControl.CaptureMouse(glWindow)
 
+	// Toggle mouse capture on echap key
+	isCpature := true
+	onKey := func(evname string, ev interface{}) {
+		kev := ev.(*window.KeyEvent)
+		if evname == "w.OnKeyDown" && kev.Key == window.KeyEscape {
+			if isCpature {
+				isCpature = false
+				WASMControl.ReleaseMouse()
+			} else {
+				isCpature = true
+				WASMControl.CaptureMouse(glWindow)
+			}
+		}
+	}
+	a.Subscribe(window.OnKeyDown, onKey)
+
+	// Debug labels
+	fpsLabel := gui.NewLabel("")
+	scene.Add(fpsLabel)
+
+	meshesLabel := gui.NewLabel("")
+	scene.Add(meshesLabel)
+	meshesCount := 0
+
 	// Framerate control/display
 	framerater := util.NewFrameRater(60)
-	label := gui.NewLabel("0")
-	scene.Add(label)
 
 	// Set up callback to update viewport and camera aspect ratio when the window is resized
 	onResize := func(evname string, ev interface{}) {
@@ -57,8 +78,9 @@ func main() {
 		a.Gls().Viewport(0, 0, int32(wWidth), int32(wHeight))
 		// Update the camera's aspect ratio
 		cam.SetAspect(float32(wWidth) / float32(wHeight))
-		// Update fps display position
-		label.SetPosition(float32(wWidth)-60, 10)
+		// Update debug display position
+		fpsLabel.SetPosition(float32(wWidth)-100, 10)
+		meshesLabel.SetPosition(float32(wWidth)-100, 30)
 	}
 	a.Subscribe(window.OnWindowSize, onResize)
 	onResize("", nil)
@@ -87,12 +109,12 @@ func main() {
 	defer close(positionChannel)
 
 	demoWorld := world.NewDemoWorld(
-		40,
+		20,
 		&blocksRepository,
 		addMeshChannel,
 		removeMeshChannel,
 		positionChannel,
-		200,
+		100,
 	)
 	go demoWorld.Run()
 	positionChannel <- cam.Position()
@@ -103,7 +125,7 @@ func main() {
 
 		fps, _, ok := framerater.FPS(deltaTime)
 		if ok {
-			label.SetText(fmt.Sprintf("FPS %d", int(fps)))
+			fpsLabel.SetText(fmt.Sprintf("FPS %d", int(fps)))
 		}
 
 		WASMControl.Update(deltaTime)
@@ -112,15 +134,17 @@ func main() {
 		renderer.Render(scene, cam)
 
 		select {
-		case meshes := <-addMeshChannel:
-			for _, bl := range meshes {
+		case blocks := <-addMeshChannel:
+			for _, bl := range blocks {
 				for _, mesh := range bl.Meshes {
+					meshesCount++
 					scene.Add(mesh)
 				}
 			}
-		case meshes := <-removeMeshChannel:
-			for _, bl := range meshes {
+		case blocks := <-removeMeshChannel:
+			for _, bl := range blocks {
 				for _, mesh := range bl.Meshes {
+					meshesCount--
 					scene.Remove(mesh)
 				}
 			}
@@ -131,6 +155,8 @@ func main() {
 				positionChannel <- cam.Position()
 			}
 		}
+
+		meshesLabel.SetText(fmt.Sprintf("Meshes %d", meshesCount))
 
 		framerater.Wait()
 	})

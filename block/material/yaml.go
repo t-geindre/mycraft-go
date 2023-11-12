@@ -13,7 +13,7 @@ type _YAMLMaterial struct {
 	Opacity        *float32
 	Texture        *string
 	Transparent    *bool
-	A              *bool
+	DepthMask      *bool `yaml:"depth_mask"`
 }
 
 type _YAMLMaterials map[string]_YAMLMaterial

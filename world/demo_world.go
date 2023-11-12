@@ -77,11 +77,19 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 	var toAdd []*block.Block
 	for x := pos.X - dw.RenderingDistance; x <= pos.X+dw.RenderingDistance; x++ {
 		for z := pos.Z - dw.RenderingDistance; z <= pos.Z+dw.RenderingDistance; z++ {
-			meshPos := math32.Vector3{X: x, Y: -2, Z: z}
-			if !dw.hasMeshAt(meshPos) {
-				b := dw.createBlockAt(meshPos)
-				dw.Blocks[b] = meshPos
-				toAdd = append(toAdd, b)
+			blockPos := math32.Vector3{X: x, Y: -2, Z: z}
+			if !dw.hasMeshAt(blockPos) {
+				bl := dw.BlockRepository.Get("green_grass")
+				bl.SetPosition(blockPos)
+
+				dw.Blocks[bl] = blockPos
+				toAdd = append(toAdd, bl)
+
+				fl := dw.BlockRepository.Get("dandelion")
+				fl.SetPosition(math32.Vector3{X: x, Y: -1, Z: z})
+
+				dw.Blocks[fl] = blockPos
+				toAdd = append(toAdd, fl)
 
 				if len(toAdd) > dw.ChanPackSize {
 					dw.AddMeshChan <- toAdd
@@ -95,13 +103,6 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 		dw.AddMeshChan <- toAdd
 		toAdd = nil
 	}
-}
-
-func (dw *DemoWorld) createBlockAt(pos math32.Vector3) *block.Block {
-	b := dw.BlockRepository.Get("green_grass")
-	b.SetPosition(pos)
-
-	return b
 }
 
 func (dw *DemoWorld) hasMeshAt(pos math32.Vector3) bool {

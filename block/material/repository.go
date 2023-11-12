@@ -46,6 +46,10 @@ func (r *Repository) AppendFromYamlFile(filePath string) {
 		mat.SetSpecularColor(getYAMLMaterialSpecularColor(def))
 		mat.SetEmissiveColor(getYAMLMaterialEmissiveColor(def))
 
+		if def.DepthMask != nil {
+			mat.SetDepthMask(*def.DepthMask)
+		}
+
 		if def.Opacity != nil {
 			mat.SetOpacity(*def.Opacity)
 		}

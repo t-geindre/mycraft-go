@@ -72,6 +72,10 @@ func (wc *WASMControl) Update(deltaTime time.Duration) {
 }
 
 func (wc *WASMControl) onCursor(_ string, ev interface{}) {
+	if wc.capturedMouseWindow == nil {
+		return
+	}
+
 	mev := ev.(*window.CursorEvent)
 
 	wc.yRotation += math32.DegToRad(wc.cursorLastX-mev.Xpos) * wc.Sensitivity / 10
