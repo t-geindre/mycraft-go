@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
@@ -31,6 +32,8 @@ func main() {
 	// Window setup
 	glWindow := a.IWindow.(*window.GlfwWindow)
 	glWindow.SetTitle("MyCraft - version -2.1.125.5-rev4-alpa0")
+	glWindow.SetSize(1600, 900)
+	//glWindow.SetFullscreen(true)
 
 	// Set the scene to be managed by the gui manager
 	gui.Manager().Set(scene)
@@ -130,17 +133,31 @@ func main() {
 	onResize("", nil)
 
 	// Create and add lights to the scene
-	scene.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 0.8))
+	scene.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.1))
 	pointLight := light.NewPoint(&math32.Color{R: 1, G: 1, B: 1}, 5.0)
-	pointLight.SetPosition(1, -2, 2)
+	pointLight.SetPosition(1, 2, 2)
 	scene.Add(pointLight)
+
+	// === test
+	geo := geometry.NewPlane(1, 1)
+
+	for j := float32(0); j < 10; j++ {
+		for k := float32(0); k < 10; k++ {
+			for i := float32(0); i < 4; i++ {
+				mesh := graphic.NewMesh(geo, materialRepository.Get("oxeye_daisy"))
+				mesh.SetPosition(2+j, -1, k)
+				mesh.SetRotation(0, math32.DegToRad(90*i), 0)
+				scene.Add(mesh)
+			}
+		}
+	}
 
 	// Set background color to gray
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Grass plan
 	grassBlock := blocksRepository.Get("green_grass")
-	grassPlanSize := float32(10)
+	grassPlanSize := float32(20)
 	for i := -grassPlanSize; i < grassPlanSize; i++ {
 		for j := -grassPlanSize; j < grassPlanSize; j++ {
 			blockMesh := grassBlock.CreateMesh()

@@ -1,4 +1,5 @@
 # block_id:
+#     type: cube # rendering type: cube (default), plant
 #     materials:
 #         all: material_id # is applied to all faces
 #         sides: material_id # applied to left, right, front and back faces
@@ -7,7 +8,10 @@
 #         right: material_id
 #         front: material_id
 #         back: material_id
-
+dandelion:
+    type: plant
+    materials:
+        all: dandelion
 green_grass:
     materials:
         sides: grass_side

@@ -12,6 +12,7 @@
 
 andesite:
     texture: assets/block/andesite.png
+
 barrel_side:
     texture: assets/block/barrel_side.png
 barrel_bottom:
@@ -20,6 +21,9 @@ barrel_top:
     texture: assets/block/barrel_top.png
 bedrock:
     texture: assets/block/bedrock.png
+dandelion:
+    texture: assets/block/dandelion.png
+    transparent: true
 diamond_block:
     texture: assets/block/diamond_block.png
 diamond_ore:
@@ -37,6 +41,12 @@ netherrack:
     texture: assets/block/netherrack.png
 oak_planks:
     texture: assets/block/oak_planks.png
+orange_tulip:
+    texture: assets/block/orange_tulip.png
+    transparent: true
+oxeye_daisy:
+    texture: assets/block/oxeye_daisy.png
+    transparent: true
 packed_ice:
     texture: assets/block/packed_ice.png
 sand:

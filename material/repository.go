@@ -9,11 +9,11 @@ import (
 )
 
 type Repository struct {
-	materials map[string]*material.Standard
+	materials map[string]material.IMaterial
 	textures  map[string]*texture.Texture2D
 }
 
-func (r *Repository) Get(id string) *material.Standard {
+func (r *Repository) Get(id string) material.IMaterial {
 	if mat, ok := r.materials[id]; ok {
 		return mat
 	}
@@ -42,21 +42,27 @@ func (r *Repository) AppendFromYamlFile(filePath string) {
 	rawYaml := file.ParseYamlFile[_YAMLMaterials](filePath)
 
 	for id, def := range rawYaml {
-		material := material.NewStandard(getYAMLMaterialColor(def))
-		material.SetSpecularColor(getYAMLMaterialSpecularColor(def))
-		material.SetEmissiveColor(getYAMLMaterialEmissiveColor(def))
+		mat := material.NewStandard(getYAMLMaterialColor(def))
+		mat.SetSpecularColor(getYAMLMaterialSpecularColor(def))
+		mat.SetEmissiveColor(getYAMLMaterialEmissiveColor(def))
 
-		if def.Texture != nil {
-			material.AddTexture(r.getTexture(*def.Texture))
+		if def.Opacity != nil {
+			mat.SetOpacity(*def.Opacity)
 		}
 
-		r.materials[id] = material
+		mat.SetTransparent(def.Transparent)
+
+		if def.Texture != nil {
+			mat.AddTexture(r.getTexture(*def.Texture))
+		}
+
+		r.materials[id] = mat
 	}
 }
 
 func NewFromYamlFile(filePath string) Repository {
 	repository := Repository{
-		map[string]*material.Standard{},
+		map[string]material.IMaterial{},
 		map[string]*texture.Texture2D{},
 	}
 
