@@ -9,7 +9,7 @@ import (
 
 type DemoWorld struct {
 	World
-	Meshes       map[*graphic.Mesh]*graphic.Mesh
+	Meshes       map[*graphic.Mesh]math32.Vector3
 	Blocks       *block.Repository
 	LatestUpdate math32.Vector3
 	Initialized  bool
@@ -22,7 +22,7 @@ func NewDemoWorld(container *core.Node, renderingDistance float32, repository *b
 			ContainerNode:     container,
 			RenderingDistance: renderingDistance,
 		},
-		Meshes:       make(map[*graphic.Mesh]*graphic.Mesh),
+		Meshes:       make(map[*graphic.Mesh]math32.Vector3),
 		Blocks:       repository,
 		LatestUpdate: math32.Vector3{X: 0, Y: 0, Z: 0},
 		Initialized:  false,
@@ -46,7 +46,6 @@ func (dw *DemoWorld) Update(pos math32.Vector3) {
 }
 
 func (dw *DemoWorld) populate(pos math32.Vector3) {
-
 	for x := pos.X - dw.RenderingDistance; x <= pos.X+dw.RenderingDistance; x++ {
 		for z := pos.Z - dw.RenderingDistance; z <= pos.Z+dw.RenderingDistance; z++ {
 			meshPos := math32.Vector3{X: x, Y: -2, Z: z}
@@ -61,12 +60,11 @@ func (dw *DemoWorld) populateMeshAt(pos math32.Vector3) {
 	mesh := dw.Blocks.Get("green_grass").CreateMesh()
 	mesh.SetPositionVec(&pos)
 	dw.ContainerNode.Add(mesh)
-	dw.Meshes[mesh] = mesh
+	dw.Meshes[mesh] = pos
 }
 
 func (dw *DemoWorld) hasMeshAt(pos math32.Vector3) bool {
-	for _, mesh := range dw.Meshes {
-		meshPos := mesh.Position()
+	for _, meshPos := range dw.Meshes {
 		if meshPos.X == pos.X && meshPos.Z == pos.Z {
 			return true
 		}
@@ -84,9 +82,7 @@ func (dw *DemoWorld) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 }
 
 func (dw *DemoWorld) cleanTooFar(pos math32.Vector3) {
-	for _, mesh := range dw.Meshes {
-		meshPos := mesh.Position()
-
+	for mesh, meshPos := range dw.Meshes {
 		dist := math32.Max(math32.Abs(meshPos.X-pos.X), math32.Abs(meshPos.Z-pos.Z))
 
 		if dist > dw.RenderingDistance {

@@ -155,21 +155,8 @@ func main() {
 		}
 	}
 
-	// Set background color to gray
+	// Set background color to some blue
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
-
-	// Grass plan
-	/*
-		grassBlock := blocksRepository.Get("green_grass")
-		grassPlanSize := float32(20)
-		for i := -grassPlanSize; i < grassPlanSize; i++ {
-			for j := -grassPlanSize; j < grassPlanSize; j++ {
-				blockMesh := grassBlock.CreateMesh()
-				blockMesh.SetPosition(i, -2, j)
-				scene.Add(blockMesh)
-			}
-		}
-	*/
 
 	// Run the application
 	rotation := float32(0)
