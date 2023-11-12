@@ -1,5 +1,5 @@
 # # all material fields are otpionals
-# default:
+# default: // todo help not complete
 #     color: white
 #     color3: { r: 1, g: 1, b: 1 } # default { r: 1, g: 1, b: 1 }, ignored if color is specified
 #     specularColor: white

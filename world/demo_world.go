@@ -1,7 +1,6 @@
 package world
 
 import (
-	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/math32"
 	"mycraft/block"
 )
@@ -9,12 +8,12 @@ import (
 type DemoWorld struct {
 	Center            math32.Vector2
 	RenderingDistance float32 // block
-	Meshes            map[*graphic.Mesh]math32.Vector3
-	Blocks            *block.Repository
+	Blocks            map[*block.Block]math32.Vector3
+	BlockRepository   *block.Repository
 	LatestUpdate      math32.Vector3
 	Initialized       bool
-	AddMeshChan       chan []*graphic.Mesh
-	RemoveMeshChan    chan []*graphic.Mesh
+	AddMeshChan       chan []*block.Block
+	RemoveMeshChan    chan []*block.Block
 	PositionChan      chan math32.Vector3
 	ChanPackSize      int
 }
@@ -22,16 +21,16 @@ type DemoWorld struct {
 func NewDemoWorld(
 	renderingDistance float32,
 	repository *block.Repository,
-	addMeshChannel chan []*graphic.Mesh,
-	removeMeshChannel chan []*graphic.Mesh,
+	addMeshChannel chan []*block.Block,
+	removeMeshChannel chan []*block.Block,
 	positionChannel chan math32.Vector3,
 	chanPackSize int,
 ) *DemoWorld {
 	demo := DemoWorld{
 		Center:            math32.Vector2{X: 0, Y: 0},
 		RenderingDistance: renderingDistance,
-		Meshes:            make(map[*graphic.Mesh]math32.Vector3),
-		Blocks:            repository,
+		Blocks:            make(map[*block.Block]math32.Vector3),
+		BlockRepository:   repository,
 		LatestUpdate:      math32.Vector3{X: 0, Y: 0, Z: 0},
 		Initialized:       false,
 		AddMeshChan:       addMeshChannel,
@@ -75,14 +74,14 @@ func (dw *DemoWorld) needsUpdate(pos math32.Vector3) bool {
 }
 
 func (dw *DemoWorld) populate(pos math32.Vector3) {
-	var toAdd []*graphic.Mesh
+	var toAdd []*block.Block
 	for x := pos.X - dw.RenderingDistance; x <= pos.X+dw.RenderingDistance; x++ {
 		for z := pos.Z - dw.RenderingDistance; z <= pos.Z+dw.RenderingDistance; z++ {
 			meshPos := math32.Vector3{X: x, Y: -2, Z: z}
 			if !dw.hasMeshAt(meshPos) {
-				mesh := dw.createMeshAt(meshPos)
-				dw.Meshes[mesh] = meshPos
-				toAdd = append(toAdd, mesh)
+				b := dw.createBlockAt(meshPos)
+				dw.Blocks[b] = meshPos
+				toAdd = append(toAdd, b)
 
 				if len(toAdd) > dw.ChanPackSize {
 					dw.AddMeshChan <- toAdd
@@ -98,15 +97,15 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 	}
 }
 
-func (dw *DemoWorld) createMeshAt(pos math32.Vector3) *graphic.Mesh {
-	mesh := dw.Blocks.Get("green_grass").CreateMesh()
-	mesh.SetPositionVec(&pos)
+func (dw *DemoWorld) createBlockAt(pos math32.Vector3) *block.Block {
+	b := dw.BlockRepository.Get("green_grass")
+	b.SetPosition(pos)
 
-	return mesh
+	return b
 }
 
 func (dw *DemoWorld) hasMeshAt(pos math32.Vector3) bool {
-	for _, meshPos := range dw.Meshes {
+	for _, meshPos := range dw.Blocks {
 		if meshPos.X == pos.X && meshPos.Z == pos.Z {
 			return true
 		}
@@ -124,13 +123,13 @@ func (dw *DemoWorld) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 }
 
 func (dw *DemoWorld) cleanTooFar(pos math32.Vector3) {
-	var toRemove []*graphic.Mesh
-	for mesh, meshPos := range dw.Meshes {
+	var toRemove []*block.Block
+	for b, meshPos := range dw.Blocks {
 		dist := math32.Max(math32.Abs(meshPos.X-pos.X), math32.Abs(meshPos.Z-pos.Z))
 
 		if dist > dw.RenderingDistance {
-			toRemove = append(toRemove, mesh)
-			delete(dw.Meshes, mesh)
+			toRemove = append(toRemove, b)
+			delete(dw.Blocks, b)
 
 			if len(toRemove) > dw.ChanPackSize {
 				dw.RemoveMeshChan <- toRemove

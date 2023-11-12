@@ -12,7 +12,8 @@ type _YAMLMaterial struct {
 	Shininess      *float32
 	Opacity        *float32
 	Texture        *string
-	Transparent    bool
+	Transparent    *bool
+	A              *bool
 }
 
 type _YAMLMaterials map[string]_YAMLMaterial

@@ -13,6 +13,7 @@ type _YAMLMaterial struct {
 
 type _YAMLBlock struct {
 	Materials _YAMLMaterial
+	Type      string
 }
 
 type _YAMLBlocks map[string]_YAMLBlock

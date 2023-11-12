@@ -22,18 +22,18 @@ func (r *Repository) Get(id string) material.IMaterial {
 
 func (r *Repository) getTexture(file string) *texture.Texture2D {
 
-	if texture, ok := r.textures[file]; ok {
-		return texture
+	if text, ok := r.textures[file]; ok {
+		return text
 	}
 
-	texture, err := texture.NewTexture2DFromImage(file)
+	text, err := texture.NewTexture2DFromImage(file)
 	if err != nil {
 		panic(err)
 	}
 
-	texture.SetMagFilter(gls.NEAREST) // avoid blurry upscale
+	text.SetMagFilter(gls.NEAREST) // avoid blurry upscale
 
-	r.textures[file] = texture
+	r.textures[file] = text
 
 	return r.textures[file]
 }
@@ -50,7 +50,9 @@ func (r *Repository) AppendFromYamlFile(filePath string) {
 			mat.SetOpacity(*def.Opacity)
 		}
 
-		mat.SetTransparent(def.Transparent)
+		if def.Transparent != nil {
+			mat.SetTransparent(*def.Transparent)
+		}
 
 		if def.Texture != nil {
 			mat.AddTexture(r.getTexture(*def.Texture))

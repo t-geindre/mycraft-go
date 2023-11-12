@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
 	"mycraft/block/material"
@@ -78,10 +77,10 @@ func main() {
 	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
 
 	// World setup
-	addMeshChannel := make(chan []*graphic.Mesh, 200)
+	addMeshChannel := make(chan []*block.Block, 200)
 	defer close(addMeshChannel)
 
-	removeMeshChannel := make(chan []*graphic.Mesh, 200)
+	removeMeshChannel := make(chan []*block.Block, 200)
 	defer close(removeMeshChannel)
 
 	positionChannel := make(chan math32.Vector3, 1)
@@ -114,12 +113,16 @@ func main() {
 
 		select {
 		case meshes := <-addMeshChannel:
-			for _, mesh := range meshes {
-				scene.Add(mesh)
+			for _, bl := range meshes {
+				for _, mesh := range bl.Meshes {
+					scene.Add(mesh)
+				}
 			}
 		case meshes := <-removeMeshChannel:
-			for _, mesh := range meshes {
-				scene.Remove(mesh)
+			for _, bl := range meshes {
+				for _, mesh := range bl.Meshes {
+					scene.Remove(mesh)
+				}
 			}
 		default:
 			if len(positionChannel) == 0 {
