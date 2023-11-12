@@ -2,15 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/g3n/engine/geometry"
-	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
 	"mycraft/camera"
 	"mycraft/material"
 	"mycraft/world"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/g3n/engine/app"
@@ -55,68 +51,6 @@ func main() {
 
 	demoWorld := world.NewDemoWorld(scene, 20, &blocksRepository)
 
-	// Current block switcher
-	var currentBlock *graphic.Mesh
-	setCurrentBlock := func(id string) {
-		scene.Remove(currentBlock)
-		currentBlock = blocksRepository.Get(id).CreateMesh()
-		scene.Add(currentBlock)
-		currentBlock.SetPosition(0, 0, 0)
-	}
-
-	// Create sorted blocks list
-	blockIds := make([]string, 0, len(blocksRepository.Blocks))
-	for name := range blocksRepository.Blocks {
-		blockIds = append(blockIds, name)
-	}
-	sort.Strings(blockIds)
-
-	// First sorted block set as default
-	setCurrentBlock(blockIds[0])
-
-	// GUI
-	_, height := a.GetSize()
-	btnSpacing := float32(height / len(blockIds))
-
-	for idx, blockName := range blockIds {
-		blockLabel := strings.Replace(blockName, "_", " ", -1)
-		blockLabel = strings.ToUpper(blockLabel)
-
-		btn := gui.NewButton(blockLabel)
-		btn.SetPosition(0, btnSpacing*float32(idx))
-		btn.SetSize(150, btnSpacing)
-
-		btn.Subscribe(
-			gui.OnClick,
-			func(blockName string) func(name string, ev interface{}) {
-				return func(_ string, _ interface{}) {
-					setCurrentBlock(blockName)
-					// remove button focus to get window events
-					gui.Manager().SetKeyFocus(nil)
-				}
-			}(blockName),
-		)
-
-		scene.Add(btn)
-	}
-
-	controlEnabled := false
-	gui.Manager().Subscribe(window.OnKeyDown, func(_ string, ev any) {
-		kev := ev.(*window.KeyEvent)
-		if kev.Key != window.KeyEscape {
-			return
-		}
-
-		if !controlEnabled {
-			WASMControl.ReleaseMouse()
-			controlEnabled = true
-			return
-		}
-		WASMControl.CaptureMouse(glWindow)
-		controlEnabled = false
-
-	})
-
 	// Framerate control/display
 	framerater := util.NewFrameRater(60)
 	label := gui.NewLabel("0")
@@ -141,25 +75,10 @@ func main() {
 	pointLight.SetPosition(1, 2, 2)
 	scene.Add(pointLight)
 
-	// === test
-	geo := geometry.NewPlane(1, 1)
-
-	for j := float32(0); j < 10; j++ {
-		for k := float32(0); k < 10; k++ {
-			for i := float32(0); i < 4; i++ {
-				mesh := graphic.NewMesh(geo, materialRepository.Get("oxeye_daisy"))
-				mesh.SetPosition(2+j, -1, k)
-				mesh.SetRotation(0, math32.DegToRad(90*i), 0)
-				scene.Add(mesh)
-			}
-		}
-	}
-
 	// Set background color to some blue
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Run the application
-	rotation := float32(0)
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		framerater.Start()
 
@@ -173,9 +92,6 @@ func main() {
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
-
-		rotation += float32(deltaTime.Milliseconds()) / 1000
-		currentBlock.SetRotation(rotation, rotation/2, 0)
 
 		framerater.Wait()
 	})
