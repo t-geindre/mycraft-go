@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
 	"mycraft/camera"
@@ -49,8 +50,6 @@ func main() {
 	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
 	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
 
-	demoWorld := world.NewDemoWorld(scene, 20, &blocksRepository)
-
 	// Framerate control/display
 	framerater := util.NewFrameRater(60)
 	label := gui.NewLabel("0")
@@ -78,6 +77,27 @@ func main() {
 	// Set background color to some blue
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
+	// World channels
+	addMeshChannel := make(chan []*graphic.Mesh, 200)
+	defer close(addMeshChannel)
+
+	removeMeshChannel := make(chan []*graphic.Mesh, 200)
+	defer close(removeMeshChannel)
+
+	positionChannel := make(chan math32.Vector3, 1)
+	defer close(positionChannel)
+
+	demoWorld := world.NewDemoWorld(
+		40,
+		&blocksRepository,
+		addMeshChannel,
+		removeMeshChannel,
+		positionChannel,
+		200,
+	)
+	go demoWorld.Run()
+	positionChannel <- cam.Position()
+
 	// Run the application
 	a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		framerater.Start()
@@ -88,10 +108,25 @@ func main() {
 		}
 
 		WASMControl.Update(deltaTime)
-		demoWorld.Update(cam.Position())
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
+
+		select {
+		case meshes := <-addMeshChannel:
+			for _, mesh := range meshes {
+				scene.Add(mesh)
+			}
+		case meshes := <-removeMeshChannel:
+			for _, mesh := range meshes {
+				scene.Remove(mesh)
+			}
+		default:
+			if len(positionChannel) == 0 {
+				// If the world go routine is still handling the last position, don't send a new one
+				positionChannel <- cam.Position()
+			}
+		}
 
 		framerater.Wait()
 	})
