@@ -8,24 +8,24 @@ import (
 )
 
 type DemoWorld struct {
-	World
-	Meshes       map[*graphic.Mesh]math32.Vector3
-	Blocks       *block.Repository
-	LatestUpdate math32.Vector3
-	Initialized  bool
+	Center            math32.Vector2
+	RenderingDistance float32 // block
+	ContainerNode     *core.Node
+	Meshes            map[*graphic.Mesh]math32.Vector3
+	Blocks            *block.Repository
+	LatestUpdate      math32.Vector3
+	Initialized       bool
 }
 
 func NewDemoWorld(container *core.Node, renderingDistance float32, repository *block.Repository) *DemoWorld {
 	demo := DemoWorld{
-		World: World{
-			Center:            math32.Vector2{X: 0, Y: 0},
-			ContainerNode:     container,
-			RenderingDistance: renderingDistance,
-		},
-		Meshes:       make(map[*graphic.Mesh]math32.Vector3),
-		Blocks:       repository,
-		LatestUpdate: math32.Vector3{X: 0, Y: 0, Z: 0},
-		Initialized:  false,
+		Center:            math32.Vector2{X: 0, Y: 0},
+		ContainerNode:     container,
+		RenderingDistance: renderingDistance,
+		Meshes:            make(map[*graphic.Mesh]math32.Vector3),
+		Blocks:            repository,
+		LatestUpdate:      math32.Vector3{X: 0, Y: 0, Z: 0},
+		Initialized:       false,
 	}
 
 	return &demo
