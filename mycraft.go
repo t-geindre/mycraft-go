@@ -8,6 +8,7 @@ import (
 	"mycraft/block"
 	"mycraft/camera"
 	"mycraft/material"
+	"mycraft/world"
 	"sort"
 	"strings"
 	"time"
@@ -40,7 +41,7 @@ func main() {
 
 	// Create perspective camera
 	cam := g3ncamera.New(1)
-	cam.SetPosition(0, 0, 3)
+	cam.SetPosition(0, 0, 0)
 	scene.Add(cam)
 
 	// Set up orbit control for the camera
@@ -51,6 +52,8 @@ func main() {
 	// Load materials and blocks
 	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
 	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
+
+	demoWorld := world.NewDemoWorld(scene, 20, &blocksRepository)
 
 	// Current block switcher
 	var currentBlock *graphic.Mesh
@@ -127,7 +130,7 @@ func main() {
 		// Update the camera's aspect ratio
 		cam.SetAspect(float32(wWidth) / float32(wHeight))
 		// Update fps display position
-		label.SetPosition(float32(wWidth)-30, 10)
+		label.SetPosition(float32(wWidth)-60, 10)
 	}
 	a.Subscribe(window.OnWindowSize, onResize)
 	onResize("", nil)
@@ -156,15 +159,17 @@ func main() {
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Grass plan
-	grassBlock := blocksRepository.Get("green_grass")
-	grassPlanSize := float32(20)
-	for i := -grassPlanSize; i < grassPlanSize; i++ {
-		for j := -grassPlanSize; j < grassPlanSize; j++ {
-			blockMesh := grassBlock.CreateMesh()
-			blockMesh.SetPosition(i, -2, j)
-			scene.Add(blockMesh)
+	/*
+		grassBlock := blocksRepository.Get("green_grass")
+		grassPlanSize := float32(20)
+		for i := -grassPlanSize; i < grassPlanSize; i++ {
+			for j := -grassPlanSize; j < grassPlanSize; j++ {
+				blockMesh := grassBlock.CreateMesh()
+				blockMesh.SetPosition(i, -2, j)
+				scene.Add(blockMesh)
+			}
 		}
-	}
+	*/
 
 	// Run the application
 	rotation := float32(0)
@@ -173,10 +178,11 @@ func main() {
 
 		fps, _, ok := framerater.FPS(deltaTime)
 		if ok {
-			label.SetText(fmt.Sprintf("%d", int(fps)))
+			label.SetText(fmt.Sprintf("FPS %d", int(fps)))
 		}
 
 		WASMControl.Update(deltaTime)
+		demoWorld.Update(cam.Position())
 
 		a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		renderer.Render(scene, cam)
