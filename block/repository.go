@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/graphic"
-	"mycraft/file"
-	"mycraft/material"
+	"mycraft/block/file"
+	"mycraft/block/material"
 )
 
 type Block struct {
@@ -39,36 +39,8 @@ func (r *Repository) AppendFromYAMLFile(filePath string) {
 
 	for id, def := range rawYaml {
 		r.Blocks[id] = Block{
-			Id: id,
-			CreateMesh: func(def _YAMLBlock) func() *graphic.Mesh {
-				return func() *graphic.Mesh {
-					mesh := graphic.NewMesh(geometry.NewCube(1), nil)
-
-					if len(def.Materials.All) > 0 {
-						mesh.SetMaterial(r.Materials.Get(def.Materials.All))
-						return mesh
-					}
-
-					if len(def.Materials.Sides) > 0 {
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceBack)
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceFront)
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceLeft)
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceRight)
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
-						mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
-						return mesh
-					}
-
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Back), blockFaceBack)
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Front), blockFaceFront)
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Left), blockFaceLeft)
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Right), blockFaceRight)
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
-					mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
-
-					return mesh
-				}
-			}(def),
+			Id:         id,
+			CreateMesh: r.getBlockMeshFunc(def),
 		}
 	}
 }
@@ -80,4 +52,64 @@ func NewFromYAMLFile(filePath string, materials material.Repository) Repository 
 	}
 	repository.AppendFromYAMLFile(filePath)
 	return repository
+}
+
+func (r *Repository) getBlockMeshFunc(def _YAMLBlock) func() *graphic.Mesh {
+	return func() *graphic.Mesh {
+		mesh := graphic.NewMesh(geometry.NewCube(1), nil)
+
+		if len(def.Materials.All) > 0 {
+			mesh.SetMaterial(r.Materials.Get(def.Materials.All))
+			return mesh
+		}
+
+		if len(def.Materials.Sides) > 0 {
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceBack)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceFront)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceLeft)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceRight)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
+			return mesh
+		}
+
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Back), blockFaceBack)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Front), blockFaceFront)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Left), blockFaceLeft)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Right), blockFaceRight)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
+
+		return mesh
+	}
+}
+
+func (r *Repository) getPlantMeshFunc(def _YAMLBlock) func() *graphic.Mesh {
+	return func() *graphic.Mesh {
+		mesh := graphic.NewMesh(geometry.NewCube(1), nil)
+
+		if len(def.Materials.All) > 0 {
+			mesh.SetMaterial(r.Materials.Get(def.Materials.All))
+			return mesh
+		}
+
+		if len(def.Materials.Sides) > 0 {
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceBack)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceFront)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceLeft)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceRight)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
+			mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
+			return mesh
+		}
+
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Back), blockFaceBack)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Front), blockFaceFront)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Left), blockFaceLeft)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Right), blockFaceRight)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
+		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
+
+		return mesh
+	}
 }

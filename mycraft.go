@@ -5,8 +5,8 @@ import (
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/util"
 	"mycraft/block"
+	"mycraft/block/material"
 	"mycraft/camera"
-	"mycraft/material"
 	"mycraft/world"
 	"time"
 
@@ -46,10 +46,6 @@ func main() {
 	WASMControl := camera.NewWASMControl(cam)
 	WASMControl.CaptureMouse(glWindow)
 
-	// Load materials and blocks
-	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
-	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
-
 	// Framerate control/display
 	framerater := util.NewFrameRater(60)
 	label := gui.NewLabel("0")
@@ -77,7 +73,11 @@ func main() {
 	// Set background color to some blue
 	a.Gls().ClearColor(.5, .5, .8, 1.0)
 
-	// World channels
+	// Load materials and blocks
+	materialRepository := material.NewFromYamlFile("assets/materials.yaml")
+	blocksRepository := block.NewFromYAMLFile("assets/blocks.yaml", materialRepository)
+
+	// World setup
 	addMeshChannel := make(chan []*graphic.Mesh, 200)
 	defer close(addMeshChannel)
 
@@ -123,7 +123,8 @@ func main() {
 			}
 		default:
 			if len(positionChannel) == 0 {
-				// If the world go routine is still handling the last position, don't send a new one
+				// If the world routine is still handling the previous position
+				// there is no need to send a new one yet
 				positionChannel <- cam.Position()
 			}
 		}

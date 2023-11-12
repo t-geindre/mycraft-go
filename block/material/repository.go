@@ -5,7 +5,7 @@ import (
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/texture"
-	"mycraft/file"
+	"mycraft/block/file"
 )
 
 type Repository struct {
