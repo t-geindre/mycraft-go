@@ -38,6 +38,7 @@ func NewDebugScene(active bool) *Debug {
 		&DebugStat{label: "FPS", update: d.updateFps},
 		&DebugStat{label: "Scenes", update: d.updateScenes, delay: 500 * time.Millisecond},
 		&DebugStat{label: "Meshes", update: d.updateMeshes, delay: 1000 * time.Millisecond},
+		&DebugStat{label: "Cam", update: d.updateCamPosition, delay: 300 * time.Millisecond},
 	}
 
 	return d
@@ -172,4 +173,9 @@ func (d *Debug) countMeshes(node *core.Node) int {
 		}
 	}
 	return meshes
+}
+
+func (d *Debug) updateCamPosition(deltaTime time.Duration, label *gui.Label) {
+	pos := d.app.Cam.Position()
+	label.SetText(fmt.Sprintf("%.2f, %.2f, %.2f", pos.X, pos.Y, pos.Z))
 }

@@ -1,7 +1,6 @@
 package scene
 
 import (
-	"fmt"
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/math32"
@@ -20,11 +19,12 @@ type Game struct {
 	container *core.Node
 	app       *app.App
 
-	addMeshChannel    chan []*block.Block
-	removeMeshChannel chan []*block.Block
+	addNodeChannel    chan []*block.Block
+	removeNodeChannel chan []*block.Block
 	positionChannel   chan math32.Vector3
 	camControl        *camera.WASMControl
 	cursorCaptured    bool
+	blocksToSkip      map[*block.Block]bool
 }
 
 func NewGameScene() *Game {
@@ -53,12 +53,15 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app.Engine.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// World channel setup
-	g.addMeshChannel = make(chan []*block.Block, 200)
-	g.removeMeshChannel = make(chan []*block.Block, 200)
+	g.addNodeChannel = make(chan []*block.Block, chanPackSize*2)
+	g.removeNodeChannel = make(chan []*block.Block, chanPackSize*2)
 	g.positionChannel = make(chan math32.Vector3, 1)
 
+	// Block skip setup
+	g.blocksToSkip = make(map[*block.Block]bool)
+
 	// Start world routine
-	demoWorld := world.NewDemoWorld(renderingDistance, g.addMeshChannel, g.removeMeshChannel, g.positionChannel, chanPackSize)
+	demoWorld := world.NewDemoWorld(renderingDistance, g.addNodeChannel, g.removeNodeChannel, g.positionChannel, chanPackSize)
 	go demoWorld.Run()
 	g.positionChannel <- g.app.Cam.Position()
 }
@@ -77,23 +80,33 @@ func (g *Game) onKeyDown(_ string, ev interface{}) {
 }
 
 func (g *Game) Update(deltaTime time.Duration) {
-	// Cam control update
 	g.camControl.Update(deltaTime)
+	g.updateWorld()
+}
 
-	// World routine communication
+func (g *Game) Dispose() {
+	g.app.Engine.UnsubscribeID(window.OnKeyDown, &g)
+
+	close(g.addNodeChannel)
+	close(g.removeNodeChannel)
+	close(g.positionChannel)
+}
+
+func (g *Game) updateWorld() {
 	select {
-	case blocks := <-g.addMeshChannel:
-		for _, bl := range blocks {
-			for _, mesh := range bl.Meshes {
-				g.container.Add(mesh)
+	case nodes := <-g.addNodeChannel:
+		for _, bl := range nodes {
+			if g.blocksToSkip[bl] {
+				delete(g.blocksToSkip, bl)
+				continue
 			}
+			g.container.Add(bl.Node)
 		}
-	case blocks := <-g.removeMeshChannel:
-		for _, bl := range blocks {
-			for _, mesh := range bl.Meshes {
-				if !g.container.Remove(mesh) {
-					fmt.Println("MESH NOT FOUND")
-				}
+	case nodes := <-g.removeNodeChannel:
+		for _, bl := range nodes {
+			if !g.container.Remove(bl.Node) {
+				// Block not added yet, store it to skip it later
+				g.blocksToSkip[bl] = true
 			}
 		}
 	default:
@@ -103,12 +116,4 @@ func (g *Game) Update(deltaTime time.Duration) {
 			g.positionChannel <- g.app.Cam.Position()
 		}
 	}
-}
-
-func (g *Game) Dispose() {
-	g.app.Engine.UnsubscribeID(window.OnKeyDown, &g)
-
-	close(g.addMeshChannel)
-	close(g.removeMeshChannel)
-	close(g.positionChannel)
 }

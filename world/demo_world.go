@@ -8,32 +8,32 @@ import (
 type DemoWorld struct {
 	Center            math32.Vector2
 	RenderingDistance float32 // block
-	Blocks            map[*block.Block]math32.Vector3
+	Blocks            map[*block.Block]*math32.Vector3
 	BlockRepository   *block.Repository
 	LatestUpdate      math32.Vector3
 	Initialized       bool
-	AddMeshChan       chan []*block.Block
-	RemoveMeshChan    chan []*block.Block
+	AddBlockChan      chan []*block.Block
+	RemoveBlockChan   chan []*block.Block
 	PositionChan      chan math32.Vector3
 	ChanPackSize      int
 }
 
 func NewDemoWorld(
 	renderingDistance float32,
-	addMeshChannel chan []*block.Block,
-	removeMeshChannel chan []*block.Block,
+	addBlockChannel chan []*block.Block,
+	removeBlockChannel chan []*block.Block,
 	positionChannel chan math32.Vector3,
 	chanPackSize int,
 ) *DemoWorld {
 	demo := DemoWorld{
 		Center:            math32.Vector2{X: 0, Y: 0},
 		RenderingDistance: renderingDistance,
-		Blocks:            make(map[*block.Block]math32.Vector3),
+		Blocks:            make(map[*block.Block]*math32.Vector3),
 		BlockRepository:   block.GetRepository(),
 		LatestUpdate:      math32.Vector3{X: 0, Y: 0, Z: 0},
 		Initialized:       false,
-		AddMeshChan:       addMeshChannel,
-		RemoveMeshChan:    removeMeshChannel,
+		AddBlockChan:      addBlockChannel,
+		RemoveBlockChan:   removeBlockChannel,
 		PositionChan:      positionChannel,
 		ChanPackSize:      chanPackSize,
 	}
@@ -76,22 +76,23 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 	var toAdd []*block.Block
 	for x := pos.X - dw.RenderingDistance; x <= pos.X+dw.RenderingDistance; x++ {
 		for z := pos.Z - dw.RenderingDistance; z <= pos.Z+dw.RenderingDistance; z++ {
-			blockPos := math32.Vector3{X: x, Y: -2, Z: z}
+			blockPos := &math32.Vector3{X: x, Y: -2, Z: z}
 			if !dw.hasMeshAt(blockPos) {
 				bl := dw.BlockRepository.Get("green_grass")
-				bl.SetPosition(blockPos)
+				bl.SetPositionVec(blockPos)
 
 				dw.Blocks[bl] = blockPos
 				toAdd = append(toAdd, bl)
 
+				flPos := &math32.Vector3{X: x, Y: -1, Z: z}
 				fl := dw.BlockRepository.Get("dandelion")
-				fl.SetPosition(math32.Vector3{X: x, Y: -1, Z: z})
+				fl.SetPositionVec(flPos)
 
 				dw.Blocks[fl] = blockPos
 				toAdd = append(toAdd, fl)
 
 				if len(toAdd) > dw.ChanPackSize {
-					dw.AddMeshChan <- toAdd
+					dw.AddBlockChan <- toAdd
 					toAdd = nil
 				}
 			}
@@ -99,12 +100,12 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 	}
 
 	if len(toAdd) > 0 {
-		dw.AddMeshChan <- toAdd
+		dw.AddBlockChan <- toAdd
 		toAdd = nil
 	}
 }
 
-func (dw *DemoWorld) hasMeshAt(pos math32.Vector3) bool {
+func (dw *DemoWorld) hasMeshAt(pos *math32.Vector3) bool {
 	for _, meshPos := range dw.Blocks {
 		if meshPos.X == pos.X && meshPos.Z == pos.Z {
 			return true
@@ -124,22 +125,22 @@ func (dw *DemoWorld) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 
 func (dw *DemoWorld) cleanTooFar(pos math32.Vector3) {
 	var toRemove []*block.Block
-	for b, meshPos := range dw.Blocks {
+	for bl, meshPos := range dw.Blocks {
 		dist := math32.Max(math32.Abs(meshPos.X-pos.X), math32.Abs(meshPos.Z-pos.Z))
 
 		if dist > dw.RenderingDistance {
-			toRemove = append(toRemove, b)
-			delete(dw.Blocks, b)
+			toRemove = append(toRemove, bl)
+			delete(dw.Blocks, bl)
 
 			if len(toRemove) > dw.ChanPackSize {
-				dw.RemoveMeshChan <- toRemove
+				dw.RemoveBlockChan <- toRemove
 				toRemove = nil
 			}
 		}
 	}
 
 	if len(toRemove) > 0 {
-		dw.RemoveMeshChan <- toRemove
+		dw.RemoveBlockChan <- toRemove
 		toRemove = nil
 	}
 }

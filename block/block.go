@@ -1,31 +1,19 @@
 package block
 
 import (
-	"github.com/g3n/engine/graphic"
-	"github.com/g3n/engine/math32"
+	"github.com/g3n/engine/core"
 )
 
 type Block struct {
-	Id     string
-	Type   string
-	Meshes []*graphic.Mesh // TODO THIS SHOULD BE A NODE, IT CAN CONTAIN MULTIPLE MESHES
+	Id   string
+	Type string
+	*core.Node
 }
 
 func (b *Block) Clone() *Block {
-	meshes := make([]*graphic.Mesh, len(b.Meshes))
-	for i, mesh := range b.Meshes {
-		meshes[i] = mesh.Clone().(*graphic.Mesh)
-	}
-
 	return &Block{
-		Id:     b.Id,
-		Type:   b.Type,
-		Meshes: meshes,
-	}
-}
-
-func (b *Block) SetPosition(pos math32.Vector3) {
-	for _, mesh := range b.Meshes {
-		mesh.SetPositionVec(&pos)
+		Id:   b.Id,
+		Type: b.Type,
+		Node: b.Node.Clone().(*core.Node),
 	}
 }

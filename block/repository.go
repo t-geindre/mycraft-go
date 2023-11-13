@@ -2,6 +2,7 @@ package block
 
 import (
 	"fmt"
+	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/geometry"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/math32"
@@ -10,7 +11,7 @@ import (
 )
 
 type Repository struct {
-	Blocks    map[string]Block
+	Blocks    map[string]func() *Block
 	Materials *material.Repository
 }
 
@@ -29,7 +30,7 @@ const (
 
 func (r *Repository) Get(id string) *Block {
 	if block, ok := r.Blocks[id]; ok {
-		return block.Clone()
+		return block()
 	}
 	panic(fmt.Errorf(`unknown block "%s"`, id))
 }
@@ -38,24 +39,29 @@ func (r *Repository) AppendFromYAMLFile(filePath string) {
 	rawYaml := file.ParseYamlFile[_YAMLBlocks](filePath)
 
 	for id, def := range rawYaml {
-		var meshes []*graphic.Mesh
-		switch def.Type {
-		case "plant":
-			meshes = r.createPlantMeshes(def)
-		default:
-			meshes = r.createCubeMeshes(def)
-		}
-		r.Blocks[id] = Block{
-			Id:     id,
-			Type:   def.Type,
-			Meshes: meshes,
-		}
+		r.Blocks[id] = func(def _YAMLBlock) func() *Block {
+			return func() *Block {
+				node := core.NewNode()
+				switch def.Type {
+				case "plant":
+					r.addPlantMeshes(def, node)
+				default:
+					r.addCubeMeshes(def, node)
+				}
+				return &Block{
+					Id:   id,
+					Type: def.Type,
+					Node: node,
+				}
+			}
+		}(def)
+
 	}
 }
 
 func NewFromYamlFile(filePath string, materials *material.Repository) *Repository {
 	repository := Repository{
-		Blocks:    map[string]Block{},
+		Blocks:    make(map[string]func() *Block),
 		Materials: materials,
 	}
 	repository.AppendFromYAMLFile(filePath)
@@ -63,12 +69,13 @@ func NewFromYamlFile(filePath string, materials *material.Repository) *Repositor
 	return &repository
 }
 
-func (r *Repository) createCubeMeshes(def _YAMLBlock) []*graphic.Mesh {
+func (r *Repository) addCubeMeshes(def _YAMLBlock, node *core.Node) {
 	mesh := graphic.NewMesh(geometry.NewCube(1), nil)
+	node.Add(mesh)
 
 	if len(def.Materials.All) > 0 {
 		mesh.SetMaterial(r.Materials.Get(def.Materials.All))
-		return []*graphic.Mesh{mesh}
+		return
 	}
 
 	if len(def.Materials.Sides) > 0 {
@@ -78,7 +85,7 @@ func (r *Repository) createCubeMeshes(def _YAMLBlock) []*graphic.Mesh {
 		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Sides), blockFaceRight)
 		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
 		mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
-		return []*graphic.Mesh{mesh}
+		return
 	}
 
 	mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Back), blockFaceBack)
@@ -88,21 +95,18 @@ func (r *Repository) createCubeMeshes(def _YAMLBlock) []*graphic.Mesh {
 	mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Bottom), blockFaceBottom)
 	mesh.AddGroupMaterial(r.Materials.Get(def.Materials.Top), blockFaceTop)
 
-	return []*graphic.Mesh{mesh}
+	return
 }
 
-func (r *Repository) createPlantMeshes(def _YAMLBlock) []*graphic.Mesh {
+func (r *Repository) addPlantMeshes(def _YAMLBlock, node *core.Node) {
 	plan := geometry.NewPlane(1, 1)
 	mat := r.Materials.Get(def.Materials.All)
-	var meshes []*graphic.Mesh
 
 	for i := float32(0); i < 4; i++ {
 		mesh := graphic.NewMesh(plan, mat)
 		mesh.SetRotationY(math32.DegToRad(90) * i)
-		meshes = append(meshes, mesh)
+		node.Add(mesh)
 	}
-
-	return meshes
 }
 
 func GetRepository() *Repository {
