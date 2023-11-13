@@ -1,10 +1,5 @@
 # Mycraft
 
-Currently display some Minecraft blocks
-
-![preview displaying a TNT block](doc/preview.png)
-
-
 ## Setup & run
 
 ```

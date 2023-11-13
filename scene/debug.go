@@ -36,7 +36,7 @@ func NewDebugScene(active bool) *Debug {
 	d.panelPadding = 5
 	d.Stats = []*DebugStat{
 		&DebugStat{label: "FPS", update: d.updateFps},
-		&DebugStat{label: "Scenes", update: d.updateScenes, delay: 1000 * time.Millisecond},
+		&DebugStat{label: "Scenes", update: d.updateScenes, delay: 500 * time.Millisecond},
 		&DebugStat{label: "Meshes", update: d.updateMeshes, delay: 1000 * time.Millisecond},
 	}
 
@@ -154,12 +154,10 @@ func (d *Debug) updateFps(_ time.Duration, label *gui.Label) {
 }
 
 func (d *Debug) updateScenes(deltaTime time.Duration, label *gui.Label) {
-	// Todo: delay operation to avoid performance impact
 	label.SetText(fmt.Sprintf("%d", len(d.app.Scenes)))
 }
 
 func (d *Debug) updateMeshes(deltaTime time.Duration, label *gui.Label) {
-	// Todo: delay operation to avoid performance impact
 	label.SetText(fmt.Sprintf("%d", d.countMeshes(d.app.RootNode)))
 }
 
