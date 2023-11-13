@@ -77,6 +77,9 @@ func (dw *DemoWorld) populate(pos math32.Vector3) {
 	for x := pos.X - dw.RenderingDistance; x <= pos.X+dw.RenderingDistance; x++ {
 		for z := pos.Z - dw.RenderingDistance; z <= pos.Z+dw.RenderingDistance; z++ {
 			blockPos := &math32.Vector3{X: x, Y: -2, Z: z}
+			if blockPos.DistanceTo(&pos) > dw.RenderingDistance {
+				continue
+			}
 			if !dw.hasMeshAt(blockPos) {
 				bl := dw.BlockRepository.Get("green_grass")
 				bl.SetPositionVec(blockPos)
