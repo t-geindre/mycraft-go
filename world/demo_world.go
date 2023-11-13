@@ -20,7 +20,6 @@ type DemoWorld struct {
 
 func NewDemoWorld(
 	renderingDistance float32,
-	repository *block.Repository,
 	addMeshChannel chan []*block.Block,
 	removeMeshChannel chan []*block.Block,
 	positionChannel chan math32.Vector3,
@@ -30,7 +29,7 @@ func NewDemoWorld(
 		Center:            math32.Vector2{X: 0, Y: 0},
 		RenderingDistance: renderingDistance,
 		Blocks:            make(map[*block.Block]math32.Vector3),
-		BlockRepository:   repository,
+		BlockRepository:   block.GetRepository(),
 		LatestUpdate:      math32.Vector3{X: 0, Y: 0, Z: 0},
 		Initialized:       false,
 		AddMeshChan:       addMeshChannel,

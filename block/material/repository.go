@@ -13,6 +13,10 @@ type Repository struct {
 	textures  map[string]*texture.Texture2D
 }
 
+const DefinitionFile = "assets/materials.yaml"
+
+var RepositoryInstance *Repository
+
 func (r *Repository) Get(id string) material.IMaterial {
 	if mat, ok := r.materials[id]; ok {
 		return mat
@@ -66,7 +70,7 @@ func (r *Repository) AppendFromYamlFile(filePath string) {
 	}
 }
 
-func NewFromYamlFile(filePath string) Repository {
+func NewFromYamlFile(filePath string) *Repository {
 	repository := Repository{
 		map[string]material.IMaterial{},
 		map[string]*texture.Texture2D{},
@@ -74,5 +78,13 @@ func NewFromYamlFile(filePath string) Repository {
 
 	repository.AppendFromYamlFile(filePath)
 
-	return repository
+	return &repository
+}
+
+func GetRepository() *Repository {
+	if RepositoryInstance == nil {
+		RepositoryInstance = NewFromYamlFile(DefinitionFile)
+	}
+
+	return RepositoryInstance
 }

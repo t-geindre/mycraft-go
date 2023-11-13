@@ -6,10 +6,9 @@ import (
 )
 
 type Block struct {
-	Id         string
-	Type       string
-	CreateMesh func() *graphic.Mesh
-	Meshes     []*graphic.Mesh
+	Id     string
+	Type   string
+	Meshes []*graphic.Mesh // TODO THIS SHOULD BE A NODE, IT CAN CONTAIN MULTIPLE MESHES
 }
 
 func (b *Block) Clone() *Block {
@@ -19,10 +18,9 @@ func (b *Block) Clone() *Block {
 	}
 
 	return &Block{
-		Id:         b.Id,
-		Type:       b.Type,
-		CreateMesh: b.CreateMesh,
-		Meshes:     meshes,
+		Id:     b.Id,
+		Type:   b.Type,
+		Meshes: meshes,
 	}
 }
 

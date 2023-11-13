@@ -11,8 +11,12 @@ import (
 
 type Repository struct {
 	Blocks    map[string]Block
-	Materials material.Repository
+	Materials *material.Repository
 }
+
+const DefinitionFile = "assets/blocks.yaml"
+
+var RepositoryInstance *Repository
 
 const (
 	blockFaceRight = iota
@@ -49,14 +53,14 @@ func (r *Repository) AppendFromYAMLFile(filePath string) {
 	}
 }
 
-func NewFromYAMLFile(filePath string, materials material.Repository) Repository {
+func NewFromYamlFile(filePath string, materials *material.Repository) *Repository {
 	repository := Repository{
 		Blocks:    map[string]Block{},
 		Materials: materials,
 	}
 	repository.AppendFromYAMLFile(filePath)
 
-	return repository
+	return &repository
 }
 
 func (r *Repository) createCubeMeshes(def _YAMLBlock) []*graphic.Mesh {
@@ -99,4 +103,12 @@ func (r *Repository) createPlantMeshes(def _YAMLBlock) []*graphic.Mesh {
 	}
 
 	return meshes
+}
+
+func GetRepository() *Repository {
+	if RepositoryInstance == nil {
+		RepositoryInstance = NewFromYamlFile(DefinitionFile, material.GetRepository())
+	}
+
+	return RepositoryInstance
 }
