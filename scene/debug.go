@@ -53,6 +53,10 @@ func (d *Debug) Setup(container *core.Node, app *app.App) {
 	d.app.Engine.SubscribeID(window.OnWindowSize, &d, d.onResize)
 
 	d.delays = make(map[*DebugStat]time.Duration)
+	for _, stat := range d.Stats {
+		// Force stat update at first frame
+		d.delays[stat] = stat.delay + time.Millisecond
+	}
 
 	d.setupGui()
 	d.onResize("", nil)
