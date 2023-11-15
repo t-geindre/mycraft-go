@@ -1,14 +1,14 @@
 package block
 
 type _YAMLMaterial struct {
-	Sides  string
-	All    string
-	Front  string
-	Left   string
-	Right  string
-	Back   string
-	Top    string
-	Bottom string
+	Sides string
+	All   string
+	South string
+	West  string
+	Est   string
+	North string
+	Up    string
+	Down  string
 }
 
 type _YAMLBlock struct {

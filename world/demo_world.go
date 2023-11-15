@@ -129,9 +129,7 @@ func (dw *DemoWorld) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 func (dw *DemoWorld) cleanTooFar(pos math32.Vector3) {
 	var toRemove []*block.Block
 	for bl, meshPos := range dw.Blocks {
-		dist := math32.Max(math32.Abs(meshPos.X-pos.X), math32.Abs(meshPos.Z-pos.Z))
-
-		if dist > dw.RenderingDistance {
+		if meshPos.DistanceTo(&pos) > dw.RenderingDistance {
 			toRemove = append(toRemove, bl)
 			delete(dw.Blocks, bl)
 

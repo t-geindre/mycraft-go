@@ -5,6 +5,7 @@ import (
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/gui"
+	engineMaterial "github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/window"
 	"mycraft/app"
@@ -21,6 +22,7 @@ type Debug struct {
 	panel           *gui.Panel
 	panelPadding    float32
 	delays          map[*DebugStat]time.Duration
+	wireFrame       bool
 }
 
 type DebugStat struct {
@@ -38,6 +40,7 @@ func NewDebugScene(active bool) *Debug {
 		&DebugStat{label: "FPS", update: d.updateFps},
 		&DebugStat{label: "Scenes", update: d.updateScenes, delay: 500 * time.Millisecond},
 		&DebugStat{label: "Meshes", update: d.updateMeshes, delay: 1000 * time.Millisecond},
+		&DebugStat{label: "Polygons", update: d.updatePolygons, delay: 1000 * time.Millisecond},
 		&DebugStat{label: "Cam", update: d.updateCamPosition, delay: 300 * time.Millisecond},
 	}
 
@@ -106,6 +109,9 @@ func (d *Debug) onKeyDown(name string, ev interface{}) {
 	if kev.Key == window.KeyF3 {
 		d.Toggle()
 	}
+	if kev.Key == window.KeyF2 {
+		d.ToggleWireframe()
+	}
 }
 
 func (d *Debug) onResize(name string, ev interface{}) {
@@ -166,6 +172,10 @@ func (d *Debug) updateMeshes(deltaTime time.Duration, label *gui.Label) {
 	label.SetText(fmt.Sprintf("%d", d.countMeshes(d.app.RootNode)))
 }
 
+func (d *Debug) updatePolygons(deltaTime time.Duration, label *gui.Label) {
+	label.SetText(fmt.Sprintf("%d", d.countPolygons(d.app.RootNode)))
+}
+
 func (d *Debug) countMeshes(node *core.Node) int {
 	meshes := 0
 	for _, child := range node.Children() {
@@ -179,7 +189,43 @@ func (d *Debug) countMeshes(node *core.Node) int {
 	return meshes
 }
 
+func (d *Debug) countPolygons(node *core.Node) int {
+	meshes := 0
+	for _, child := range node.Children() {
+		switch child.(type) {
+		case *graphic.Mesh:
+			indices := child.(*graphic.Mesh).GetGeometry().Indices()
+			meshes += indices.Len() / 3
+		case *core.Node:
+			meshes += d.countPolygons(child.(*core.Node))
+		}
+	}
+	return meshes
+}
+
 func (d *Debug) updateCamPosition(deltaTime time.Duration, label *gui.Label) {
 	pos := d.app.Cam.Position()
 	label.SetText(fmt.Sprintf("%.2f, %.2f, %.2f", pos.X, pos.Y, pos.Z))
+}
+
+func (d *Debug) ToggleWireframe() {
+	d.wireFrame = !d.wireFrame
+	d.setWireFrame(d.app.RootNode, d.wireFrame)
+}
+
+func (d *Debug) setWireFrame(node *core.Node, wireframe bool) {
+	for _, child := range node.Children() {
+		switch child.(type) {
+		case *graphic.Mesh:
+			materials := child.(*graphic.Mesh).Materials()
+			for _, mat := range materials {
+				switch mat.IMaterial().(type) {
+				case *engineMaterial.Standard:
+					mat.IMaterial().(*engineMaterial.Standard).SetWireframe(wireframe)
+				}
+			}
+		case *core.Node:
+			d.setWireFrame(child.(*core.Node), wireframe)
+		}
+	}
 }

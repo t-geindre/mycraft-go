@@ -36,6 +36,8 @@ func (r *Repository) getTexture(file string) *texture.Texture2D {
 	}
 
 	text.SetMagFilter(gls.NEAREST) // avoid blurry upscale
+	//text.SetWrapT(gls.REPEAT)      // Repeat texture on bigger surfaces
+	//text.SetWrapS(gls.REPEAT) // Repeat texture on bigger surfaces
 
 	r.textures[file] = text
 

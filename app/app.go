@@ -38,7 +38,7 @@ func NewApp(appName string, targetFps uint) *App {
 
 	a.GlsWindow = a.Engine.IWindow.(*window.GlfwWindow)
 	a.GlsWindow.SetTitle(appName)
-	a.GlsWindow.SetSize(1600, 900)
+	a.GlsWindow.SetSize(800, 600)
 
 	a.Cam = camera.New(1)
 	a.Cam.SetPosition(0, 0, 0)
