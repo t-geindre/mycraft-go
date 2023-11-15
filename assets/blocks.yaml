@@ -2,12 +2,12 @@
 #     type: cube # rendering type: cube (default), plant
 #     materials:
 #         all: material_id # is applied to all faces
-#         sides: material_id # applied to left, right, front and back faces
-#         top: material_id
-#         left: material_id
-#         right: material_id
-#         front: material_id
-#         back: material_id
+#         sides: material_id # applied to left, right, south and back faces
+#         up: material_id
+#         west: material_id
+#         est: material_id
+#         south: material_id
+#         north: material_id
 dandelion:
     type: plant
     materials:
@@ -15,8 +15,8 @@ dandelion:
 green_grass:
     materials:
         sides: grass_side
-        top: grass_top
-        bottom: dirt
+        up: grass_top
+        down: dirt
 dirt:
     materials:
         all: dirt
@@ -28,36 +28,36 @@ stone:
         all: stone
 smitting_table:
     materials:
-        front: smithing_table_front
-        left: smithing_table_side
-        right: smithing_table_side
-        back: smithing_table_front
-        top: smithing_table_top
-        bottom: smithing_table_bottom
+        south: smithing_table_front
+        west: smithing_table_side
+        est: smithing_table_side
+        north: smithing_table_front
+        up: smithing_table_top
+        down: smithing_table_bottom
 smooth_basalt:
     materials:
       all: smooth_basalt
 tnt:
     materials:
-        bottom: tnt_bottom
+        down: tnt_bottom
         sides: tnt_side
-        top: tnt_top
+        up: tnt_top
 andesite:
     materials:
         all: andesite
 barrel:
     materials:
-        top: barrel_top
+        up: barrel_top
         sides: barrel_side
-        bottom: barrel_bottom
+        down: barrel_bottom
 stone_brick:
     materials:
         all: stone_bricks
 spruce_log:
     materials:
         sides: spruce_log_side
-        top: spruce_log_top
-        bottom: spruce_log_top
+        up: spruce_log_top
+        down: spruce_log_top
 snow:
     materials:
         all: snow
