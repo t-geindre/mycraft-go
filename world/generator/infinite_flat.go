@@ -27,7 +27,7 @@ func (g *InfiniteFlat) Populate(chunk *world.Chunk, addChunkletChan chan []*worl
 			}
 			chunk.AddChunklet(chunklet)
 			chunklets = append(chunklets, chunklet)
-			if len(chunklets)%50 == 0 {
+			if len(chunklets) == 50 {
 				addChunkletChan <- chunklets
 				chunklets = make([]*world.Chunklet, 0)
 			}

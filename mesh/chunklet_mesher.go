@@ -38,6 +38,8 @@ func (cm *ChunkletMesher) ComputeQuads() {
 
 				cX, cY, cZ := float32(x), float32(y), float32(z)
 
+				// todo check neighbors
+
 				if y == cm.chunklet.Size-1 || cm.chunklet.Blocks[x][y+1][z] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY + 1, Z: cZ},

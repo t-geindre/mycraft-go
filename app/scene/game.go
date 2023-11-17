@@ -1,7 +1,6 @@
 package scene
 
 import (
-	"fmt"
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/light"
@@ -80,7 +79,7 @@ func (g *Game) Update(deltaTime time.Duration) {
 				chunklet.Subscribe(world.OnDispose, func(mesh *graphic.Mesh) func(_ string, ev interface{}) {
 					return func(_ string, ev interface{}) {
 						g.container.Remove(mesh)
-						fmt.Println("Chunklet disposed")
+						mesh.GetGeometry().Dispose()
 					}
 				}(mesh))
 			}

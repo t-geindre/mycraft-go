@@ -38,7 +38,6 @@ func (w *World) Run() {
 		w.initialized = true
 
 		w.addMissingChunks(pos)
-		w.clearTooFarChunks(pos)
 	}
 }
 
@@ -65,8 +64,8 @@ func (*World) GetWorldCoordinates(pos math32.Vector3) math32.Vector2 {
 }
 
 func (w *World) addMissingChunks(pos math32.Vector2) {
-	for x := pos.X - w.rDist - 1; x <= pos.X+w.rDist; x++ {
-		for y := pos.Y - w.rDist - 1; y <= pos.Y+w.rDist; y++ {
+	for x := pos.X - w.rDist; x <= pos.X+w.rDist; x++ {
+		for y := pos.Y - w.rDist; y <= pos.Y+w.rDist; y++ {
 			chunkPos := math32.Vector2{X: x, Y: y}
 			if _, ok := w.chunks[chunkPos]; !ok {
 				chunkWorldPos := math32.Vector2{
@@ -82,7 +81,7 @@ func (w *World) addMissingChunks(pos math32.Vector2) {
 
 func (w *World) clearTooFarChunks(pos math32.Vector2) {
 	for chunkPos, _ := range w.chunks {
-		if math32.Abs(pos.X)+chunkPos.X > w.rDist || math32.Abs(pos.Y)+chunkPos.Y > w.rDist {
+		if math32.Abs(chunkPos.X-pos.X) > w.rDist || math32.Abs(pos.Y-chunkPos.Y) > w.rDist {
 			for _, chunklet := range w.chunks[chunkPos].chunklets {
 				chunklet.Dispose()
 			}
