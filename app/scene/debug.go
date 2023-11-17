@@ -32,9 +32,9 @@ type DebugStat struct {
 	delay  time.Duration
 }
 
-func NewDebugScene(active bool) *Debug {
+func NewDebugScene() *Debug {
 	d := new(Debug)
-	d.isActive = active
+	d.isActive = true
 	d.panelPadding = 5
 	d.Stats = []*DebugStat{
 		&DebugStat{label: "FPS", update: d.updateFps},

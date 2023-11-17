@@ -11,7 +11,7 @@ import (
 )
 
 type ChunkletMesher struct {
-	chunk            *world.Chunklet
+	chunklet         *world.Chunklet
 	quads            []*geometry.Quad
 	quadsOptimized   []*geometry.Quad
 	quadsByMatOrient map[material.IMaterial]map[uint8][]*geometry.Quad
@@ -19,7 +19,7 @@ type ChunkletMesher struct {
 
 func NewChunkletMesher(chunk *world.Chunklet) *ChunkletMesher {
 	cm := new(ChunkletMesher)
-	cm.chunk = chunk
+	cm.chunklet = chunk
 
 	return cm
 }
@@ -29,60 +29,60 @@ func (cm *ChunkletMesher) ComputeQuads() {
 	cm.quadsOptimized = make([]*geometry.Quad, 0)
 	cm.quadsByMatOrient = make(map[material.IMaterial]map[uint8][]*geometry.Quad)
 
-	for x := 0; x < cm.chunk.Size; x++ {
-		for y := 0; y < cm.chunk.Size; y++ {
-			for z := 0; z < cm.chunk.Size; z++ {
-				if cm.chunk.Blocks[x][y][z] == nil {
+	for x := 0; x < cm.chunklet.Size; x++ {
+		for y := 0; y < cm.chunklet.Size; y++ {
+			for z := 0; z < cm.chunklet.Size; z++ {
+				if cm.chunklet.Blocks[x][y][z] == nil {
 					continue
 				}
 
 				cX, cY, cZ := float32(x), float32(y), float32(z)
 
-				if y == cm.chunk.Size-1 || cm.chunk.Blocks[x][y+1][z] == nil {
+				if y == cm.chunklet.Size-1 || cm.chunklet.Blocks[x][y+1][z] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY + 1, Z: cZ},
 						geometry.QuadFaceUp,
-						cm.chunk.Blocks[x][y][z].Materials.Up,
+						cm.chunklet.Blocks[x][y][z].Materials.Top,
 					)
 				}
 
-				if y == 0 || cm.chunk.Blocks[x][y-1][z] == nil {
+				if y == 0 || cm.chunklet.Blocks[x][y-1][z] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY, Z: cZ},
 						geometry.QuadFaceDown,
-						cm.chunk.Blocks[x][y][z].Materials.Down,
+						cm.chunklet.Blocks[x][y][z].Materials.Bottom,
 					)
 				}
 
-				if z == 0 || cm.chunk.Blocks[x][y][z-1] == nil {
+				if z == 0 || cm.chunklet.Blocks[x][y][z-1] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY, Z: cZ},
 						geometry.QuadFaceSouth,
-						cm.chunk.Blocks[x][y][z].Materials.South,
+						cm.chunklet.Blocks[x][y][z].Materials.South,
 					)
 				}
 
-				if z == cm.chunk.Size-1 || cm.chunk.Blocks[x][y][z+1] == nil {
+				if z == cm.chunklet.Size-1 || cm.chunklet.Blocks[x][y][z+1] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY, Z: cZ + 1},
 						geometry.QuadFaceNorth,
-						cm.chunk.Blocks[x][y][z].Materials.North,
+						cm.chunklet.Blocks[x][y][z].Materials.North,
 					)
 				}
 
-				if x == 0 || cm.chunk.Blocks[x-1][y][z] == nil {
+				if x == 0 || cm.chunklet.Blocks[x-1][y][z] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX, Y: cY, Z: cZ},
 						geometry.QuadFaceEast,
-						cm.chunk.Blocks[x][y][z].Materials.East,
+						cm.chunklet.Blocks[x][y][z].Materials.East,
 					)
 				}
 
-				if x == cm.chunk.Size-1 || cm.chunk.Blocks[x+1][y][z] == nil {
+				if x == cm.chunklet.Size-1 || cm.chunklet.Blocks[x+1][y][z] == nil {
 					cm.AddNewQuad(
 						math32.Vector3{X: cX + 1, Y: cY, Z: cZ},
 						geometry.QuadFaceWest,
-						cm.chunk.Blocks[x][y][z].Materials.West,
+						cm.chunklet.Blocks[x][y][z].Materials.West,
 					)
 				}
 			}
@@ -222,6 +222,8 @@ func (cm *ChunkletMesher) GetMesh() *graphic.Mesh {
 			mesh.AddGroupMaterial(mat, groupId)
 		}
 	}
+
+	mesh.SetPositionVec(cm.chunklet.Position)
 
 	return mesh
 }

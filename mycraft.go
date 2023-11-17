@@ -2,13 +2,12 @@ package main
 
 import (
 	"mycraft/app"
-	"mycraft/scene"
+	"mycraft/app/scene"
 )
 
 func main() {
 	a := app.NewApp("Mycraft", 60)
-	//a.AddScene(scene.NewGameScene())
-	a.AddScene(scene.NewDebugScene(true))
-	a.AddScene(scene.NewTestScene())
+	a.AddScene(scene.NewGameScene())
+	a.AddScene(scene.NewDebugScene())
 	a.Run()
 }

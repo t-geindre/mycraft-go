@@ -13,12 +13,6 @@ import (
 	"time"
 )
 
-type Scene interface {
-	Setup(container *core.Node, app *App)
-	Update(deltaTime time.Duration)
-	Dispose()
-}
-
 type App struct {
 	Engine      *app.Application
 	Cam         *camera.Camera
@@ -98,8 +92,8 @@ func (a *App) Run() {
 		a.Framerater.Start()
 		a.Engine.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 
-		for _, scene := range a.Scenes {
-			scene.Update(deltaTime)
+		for _, sc := range a.Scenes {
+			sc.Update(deltaTime)
 		}
 
 		if err := renderer.Render(a.RootNode, a.Cam); err != nil {
