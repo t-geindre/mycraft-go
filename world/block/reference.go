@@ -8,6 +8,7 @@ import (
 const (
 	GrassBlock = iota
 	DirtBlock
+	StoneBlock
 )
 
 type blockDefMaterials struct {
@@ -46,6 +47,17 @@ func blockReference() map[uint16]blockDef {
 			South:  matRepo.Get(matRef.DirtBlock),
 			East:   matRepo.Get(matRef.DirtBlock),
 			West:   matRepo.Get(matRef.DirtBlock),
+		},
+	}
+
+	ref[StoneBlock] = blockDef{
+		Materials: blockDefMaterials{
+			Top:    matRepo.Get(matRef.StoneBlock),
+			Bottom: matRepo.Get(matRef.StoneBlock),
+			North:  matRepo.Get(matRef.StoneBlock),
+			South:  matRepo.Get(matRef.StoneBlock),
+			East:   matRepo.Get(matRef.StoneBlock),
+			West:   matRepo.Get(matRef.StoneBlock),
 		},
 	}
 

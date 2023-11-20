@@ -23,9 +23,17 @@ func (g *InfiniteRandom) Populate(chunk *world.Chunk, addChunkletChan chan []*wo
 			chunklet := world.NewChunklet(position)
 			for x := 0; x < world.ChunkletSize; x++ {
 				for y := 0; y < world.ChunkletSize; y++ {
-					height := rand.Intn(5) + 1
+					height := rand.Intn(15) + 1
 					for i := height; i > 0; i-- {
-						chunklet.SetBlockAt(x, i, y, block.GetRepository().Get(block.GrassBlock))
+						if i == height {
+							chunklet.SetBlockAt(x, i, y, block.GetRepository().Get(block.GrassBlock))
+							continue
+						}
+						if height-i > 2 {
+							chunklet.SetBlockAt(x, i, y, block.GetRepository().Get(block.StoneBlock))
+							continue
+						}
+						chunklet.SetBlockAt(x, i, y, block.GetRepository().Get(block.DirtBlock))
 					}
 				}
 			}

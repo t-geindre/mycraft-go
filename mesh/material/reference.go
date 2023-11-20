@@ -9,6 +9,7 @@ const (
 	GrassBlockTop = iota
 	GrassBlockSide
 	DirtBlock
+	StoneBlock
 )
 
 type materialDef struct {
@@ -33,6 +34,10 @@ func materialReference() map[uint16]materialDef {
 
 	ref[DirtBlock] = materialDef{
 		TextureFile: "assets/block/dirt.png",
+	}
+
+	ref[StoneBlock] = materialDef{
+		TextureFile: "assets/block/stone.png",
 	}
 
 	return ref
