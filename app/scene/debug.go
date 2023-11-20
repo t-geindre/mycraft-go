@@ -3,6 +3,7 @@ package scene
 import (
 	"fmt"
 	"github.com/g3n/engine/core"
+	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/gui"
 	engineMaterial "github.com/g3n/engine/material"
@@ -23,6 +24,7 @@ type Debug struct {
 	panelPadding    float32
 	delays          map[*DebugStat]time.Duration
 	wireFrame       bool
+	lastDrawCalls   uint64
 }
 
 type DebugStat struct {
@@ -42,6 +44,8 @@ func NewDebugScene() *Debug {
 		&DebugStat{label: "Meshes", update: d.updateMeshes, delay: 1000 * time.Millisecond},
 		&DebugStat{label: "Polygons", update: d.updatePolygons, delay: 1000 * time.Millisecond},
 		&DebugStat{label: "Cam", update: d.updateCamPosition, delay: 300 * time.Millisecond},
+		&DebugStat{label: "Draw calls", update: d.updateDrawCalls},
+		&DebugStat{label: "Textures", update: d.updateTexturesCount},
 	}
 
 	return d
@@ -174,6 +178,21 @@ func (d *Debug) updateMeshes(deltaTime time.Duration, label *gui.Label) {
 
 func (d *Debug) updatePolygons(deltaTime time.Duration, label *gui.Label) {
 	label.SetText(fmt.Sprintf("%d", d.countPolygons(d.app.RootNode)))
+}
+
+func (d *Debug) updateDrawCalls(deltaTime time.Duration, label *gui.Label) {
+	stats := &gls.Stats{}
+	d.app.Engine.Gls().Stats(stats)
+
+	label.SetText(fmt.Sprintf("%d", stats.Drawcalls-d.lastDrawCalls))
+	d.lastDrawCalls = stats.Drawcalls
+}
+
+func (d *Debug) updateTexturesCount(deltaTime time.Duration, label *gui.Label) {
+	stats := &gls.Stats{}
+	d.app.Engine.Gls().Stats(stats)
+
+	label.SetText(fmt.Sprintf("%d", stats.Textures))
 }
 
 func (d *Debug) countMeshes(node *core.Node) int {

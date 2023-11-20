@@ -1,20 +1,20 @@
 package scene
 
 import (
+	"fmt"
 	"github.com/g3n/engine/core"
-	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/window"
 	"mycraft/app"
 	"mycraft/camera"
-	mesh2 "mycraft/mesh"
+	"mycraft/mesh"
 	"mycraft/world"
 	"mycraft/world/generator"
 	"time"
 )
 
-const renderingDistance = 5 // chunks
+const renderingDistance = 4 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -48,7 +48,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app.Engine.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Create world
-	g.world = world.NewWorld(renderingDistance, generator.NewInfiniteFlatGenerator())
+	g.world = world.NewWorld(renderingDistance, generator.NewInfiniteRandomGenerator())
 }
 
 func (g *Game) onKeyDown(_ string, ev interface{}) {
@@ -67,23 +67,20 @@ func (g *Game) onKeyDown(_ string, ev interface{}) {
 func (g *Game) Update(deltaTime time.Duration) {
 	g.camControl.Update(deltaTime)
 
-	chunklets := g.world.UpdateFromVec3(g.app.Cam.Position())
-	if chunklets != nil && len(chunklets) > 0 {
+	g.world.UpdateFromVec3(g.app.Cam.Position())
+	select {
+	case chunklets := <-g.world.GetChunkletToAdd():
 		for _, chunklet := range chunklets {
-			if !chunklet.Empty {
-				mesher := mesh2.NewChunkletMesher(chunklet)
-				mesher.ComputeQuads()
-				mesh := mesher.GetMesh()
-				g.container.Add(mesh)
-
-				chunklet.Subscribe(world.OnDispose, func(mesh *graphic.Mesh) func(_ string, ev interface{}) {
-					return func(_ string, ev interface{}) {
-						g.container.Remove(mesh)
-						mesh.GetGeometry().Dispose()
-					}
-				}(mesh))
+			chunklet.Mesh = mesh.NewChunkletMesh(chunklet)
+			g.container.Add(chunklet.Mesh)
+		}
+	case chunklets := <-g.world.GetChunkletToRemove():
+		for _, chunklet := range chunklets {
+			if ok := g.container.Remove(chunklet.Mesh); !ok {
+				fmt.Println("Failed to remove chunklet")
 			}
 		}
+	default:
 	}
 }
 

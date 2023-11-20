@@ -17,11 +17,12 @@ type ChunkletMesher struct {
 	quadsByMatOrient map[material.IMaterial]map[uint8][]*geometry.Quad
 }
 
-func NewChunkletMesher(chunk *world.Chunklet) *ChunkletMesher {
+func NewChunkletMesh(chunk *world.Chunklet) *graphic.Mesh {
 	cm := new(ChunkletMesher)
 	cm.chunklet = chunk
+	cm.ComputeQuads()
 
-	return cm
+	return cm.GetMesh()
 }
 
 func (cm *ChunkletMesher) ComputeQuads() {
@@ -186,30 +187,31 @@ func (cm *ChunkletMesher) GetMesh() *graphic.Mesh {
 	uvs := math32.NewArrayF32(0, 16)
 	indices := math32.NewArrayU32(0, 16)
 
-	materialMap := make(map[material.IMaterial][]int)
+	materialMap := make(map[material.IMaterial]int)
+	quadsByMaterial := make(map[material.IMaterial][]*geometry.Quad)
+	for _, quad := range cm.quadsOptimized {
+		if _, ok := quadsByMaterial[quad.Material()]; !ok {
+			quadsByMaterial[quad.Material()] = make([]*geometry.Quad, 0)
+		}
+		quadsByMaterial[quad.Material()] = append(quadsByMaterial[quad.Material()], quad)
+	}
 
 	offset := uint32(0)
 	matGroupId := 0
-	for _, quad := range cm.quadsOptimized {
-		if quad == nil {
-			continue
+	for mat, quads := range quadsByMaterial {
+		materialMap[mat] = matGroupId
+		indicesLen := 0
+		indicesStart := indices.Len()
+		for _, quad := range quads {
+			quadIndices := quad.Indices(offset)
+			indicesLen += len(quadIndices)
+			positions.Append(quad.Vertices()...)
+			normals.Append(quad.Normals()...)
+			uvs.Append(quad.Uvs()...)
+			indices.Append(quadIndices...)
+			offset = uint32(positions.Len() / 3)
 		}
-
-		if _, ok := materialMap[quad.Material()]; !ok {
-			materialMap[quad.Material()] = make([]int, 0)
-		}
-
-		materialMap[quad.Material()] = append(materialMap[quad.Material()], matGroupId)
-
-		quadIndices := quad.Indices(offset)
-		geo.AddGroup(indices.Len(), len(quadIndices), matGroupId)
-
-		positions.Append(quad.Vertices()...)
-		normals.Append(quad.Normals()...)
-		uvs.Append(quad.Uvs()...)
-		indices.Append(quadIndices...)
-
-		offset = uint32(positions.Len() / 3)
+		geo.AddGroup(indicesStart, indicesLen, matGroupId)
 		matGroupId++
 	}
 
@@ -219,10 +221,8 @@ func (cm *ChunkletMesher) GetMesh() *graphic.Mesh {
 	geo.AddVBO(gls.NewVBO(uvs).AddAttrib(gls.VertexTexcoord))
 
 	mesh := graphic.NewMesh(geo, nil)
-	for mat, groupIds := range materialMap {
-		for _, groupId := range groupIds {
-			mesh.AddGroupMaterial(mat, groupId)
-		}
+	for mat, groupId := range materialMap {
+		mesh.AddGroupMaterial(mat, groupId)
 	}
 
 	mesh.SetPositionVec(cm.chunklet.Position)

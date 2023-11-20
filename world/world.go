@@ -38,22 +38,19 @@ func (w *World) Run() {
 		w.initialized = true
 
 		w.addMissingChunks(pos)
+		w.clearTooFarChunks(pos)
 	}
 }
 
-func (w *World) Update(pos math32.Vector2) []*Chunklet {
+func (w *World) Update(pos math32.Vector2) {
 	if len(w.posChan) > 0 {
 		<-w.posChan
 	}
 	w.posChan <- pos
-
-	w.clearTooFarChunks(pos)
-
-	return w.getChunkletToAdd()
 }
 
-func (w *World) UpdateFromVec3(pos math32.Vector3) []*Chunklet {
-	return w.Update(w.GetWorldCoordinates(pos))
+func (w *World) UpdateFromVec3(pos math32.Vector3) {
+	w.Update(w.GetWorldCoordinates(pos))
 }
 
 func (*World) GetWorldCoordinates(pos math32.Vector3) math32.Vector2 {
@@ -82,19 +79,16 @@ func (w *World) addMissingChunks(pos math32.Vector2) {
 func (w *World) clearTooFarChunks(pos math32.Vector2) {
 	for chunkPos, _ := range w.chunks {
 		if math32.Abs(chunkPos.X-pos.X) > w.rDist || math32.Abs(pos.Y-chunkPos.Y) > w.rDist {
-			for _, chunklet := range w.chunks[chunkPos].chunklets {
-				chunklet.Dispose()
-			}
+			w.removeChunkletChan <- w.chunks[chunkPos].chunklets
 			delete(w.chunks, chunkPos)
 		}
 	}
 }
 
-func (w *World) getChunkletToAdd() []*Chunklet {
-	select {
-	case chunklet := <-w.addChunkletChan:
-		return chunklet
-	default:
-		return nil
-	}
+func (w *World) GetChunkletToAdd() chan []*Chunklet {
+	return w.addChunkletChan
+}
+
+func (w *World) GetChunkletToRemove() chan []*Chunklet {
+	return w.removeChunkletChan
 }

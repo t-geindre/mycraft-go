@@ -15,7 +15,7 @@ type Chunklet struct {
 	Blocks   [ChunkletSize][ChunkletSize][ChunkletSize]*block.Block
 	Size     int
 	Empty    bool
-	core.Dispatcher
+	Mesh     core.INode
 }
 
 func NewChunklet(position math32.Vector3) *Chunklet {
@@ -23,7 +23,6 @@ func NewChunklet(position math32.Vector3) *Chunklet {
 	c.Position = &position
 	c.Size = ChunkletSize
 	c.Empty = true
-	c.Dispatcher.Initialize()
 
 	return c
 }
@@ -31,8 +30,4 @@ func NewChunklet(position math32.Vector3) *Chunklet {
 func (c *Chunklet) SetBlockAt(x, y, z int, b *block.Block) {
 	c.Blocks[x][y][z] = b
 	c.Empty = false
-}
-
-func (c *Chunklet) Dispose() {
-	c.Dispatcher.Dispatch(OnDispose, c)
 }
