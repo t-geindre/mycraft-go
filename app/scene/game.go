@@ -73,10 +73,14 @@ func (g *Game) Update(deltaTime time.Duration) {
 	g.world.UpdateFromVec3(g.app.Cam.Position())
 
 	select {
-	case chunk := <-g.world.AddChunkChannel():
-		g.worldMesher.AddChunk(chunk)
-	case chunk := <-g.world.RemoveChunkChannel():
-		g.worldMesher.RemoveChunk(chunk)
+	case chunks := <-g.world.AddChunkChannel():
+		for _, chunk := range chunks {
+			g.worldMesher.AddChunk(chunk)
+		}
+	case chunks := <-g.world.RemoveChunkChannel():
+		for _, chunk := range chunks {
+			g.worldMesher.RemoveChunk(chunk)
+		}
 	default:
 	}
 
