@@ -10,6 +10,7 @@ import (
 	"github.com/g3n/engine/math32"
 	"github.com/g3n/engine/window"
 	"mycraft/app"
+	"mycraft/mesh"
 	"time"
 )
 
@@ -235,8 +236,8 @@ func (d *Debug) ToggleWireframe() {
 func (d *Debug) setWireFrame(node *core.Node, wireframe bool) {
 	for _, child := range node.Children() {
 		switch child.(type) {
-		case *graphic.Mesh:
-			materials := child.(*graphic.Mesh).Materials()
+		case *mesh.Chunklet:
+			materials := child.(*mesh.Chunklet).Materials()
 			for _, mat := range materials {
 				switch mat.IMaterial().(type) {
 				case *engineMaterial.Standard:

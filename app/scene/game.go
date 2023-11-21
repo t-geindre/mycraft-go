@@ -1,7 +1,6 @@
 package scene
 
 import (
-	"fmt"
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/light"
 	"github.com/g3n/engine/math32"
@@ -14,7 +13,7 @@ import (
 	"time"
 )
 
-const renderingDistance = 4 // chunks
+const renderingDistance = 8 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -22,6 +21,7 @@ type Game struct {
 	camControl     *camera.WASMControl
 	cursorCaptured bool
 	world          *world.World
+	worldMesher    *mesh.WorldMesher
 }
 
 func NewGameScene() *Game {
@@ -48,7 +48,12 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app.Engine.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Create world
-	g.world = world.NewWorld(renderingDistance, generator.NewInfiniteRandomGenerator())
+	// Rendering distance is increased by 1 to avoid chunks not being rendered
+	g.world = world.NewWorld(renderingDistance+1, generator.NewInfiniteRandomGenerator())
+
+	// Create world mesher
+	g.worldMesher = mesh.NewWorldMesher(renderingDistance * mesh.ChunkletSize)
+	g.container.Add(g.worldMesher.Container())
 }
 
 func (g *Game) onKeyDown(_ string, ev interface{}) {
@@ -65,23 +70,18 @@ func (g *Game) onKeyDown(_ string, ev interface{}) {
 }
 
 func (g *Game) Update(deltaTime time.Duration) {
-	g.camControl.Update(deltaTime)
-
 	g.world.UpdateFromVec3(g.app.Cam.Position())
+
 	select {
-	case chunklets := <-g.world.GetChunkletToAdd():
-		for _, chunklet := range chunklets {
-			chunklet.Mesh = mesh.NewChunkletMesh(chunklet)
-			g.container.Add(chunklet.Mesh)
-		}
-	case chunklets := <-g.world.GetChunkletToRemove():
-		for _, chunklet := range chunklets {
-			if ok := g.container.Remove(chunklet.Mesh); !ok {
-				fmt.Println("Failed to remove chunklet")
-			}
-		}
+	case chunk := <-g.world.AddChunkChannel():
+		g.worldMesher.AddChunk(chunk)
+	case chunk := <-g.world.RemoveChunkChannel():
+		g.worldMesher.RemoveChunk(chunk)
 	default:
 	}
+
+	g.camControl.Update(deltaTime)
+	g.worldMesher.Update(g.app.Cam.Position())
 }
 
 func (g *Game) Dispose() {
