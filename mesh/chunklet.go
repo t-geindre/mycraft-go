@@ -54,7 +54,6 @@ func (c *Chunklet) computeQuads() {
 		for y := c.index; y < c.index+ChunkletSize; y++ {
 			for z := float32(0); z < c.centerChunk.Size().Z; z++ {
 				iX, iY, iZ := int(x), int(y), int(z)
-
 				if c.centerChunk.GetBlockAt(iX, iY, iZ) == nil {
 					continue
 				}
@@ -63,7 +62,7 @@ func (c *Chunklet) computeQuads() {
 
 				if y == c.centerChunk.Size().Y-1 || c.centerChunk.GetBlockAt(iX, iY+1, iZ) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x, Y: y + 1, Z: z},
+						math32.Vector3{X: x, Y: y + 1 - c.index, Z: z},
 						geometry.QuadFaceUp,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.Top,
 					)
@@ -71,7 +70,7 @@ func (c *Chunklet) computeQuads() {
 
 				if y == 0 || c.centerChunk.GetBlockAt(iX, iY-1, iZ) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x, Y: y, Z: z},
+						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceDown,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.Bottom,
 					)
@@ -79,7 +78,7 @@ func (c *Chunklet) computeQuads() {
 
 				if z == 0 || c.centerChunk.GetBlockAt(iX, iY, iZ-1) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x, Y: y, Z: z},
+						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceSouth,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.South,
 					)
@@ -87,7 +86,7 @@ func (c *Chunklet) computeQuads() {
 
 				if z == c.centerChunk.Size().Z-1 || c.centerChunk.GetBlockAt(iX, iY, iZ+1) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x, Y: y, Z: z + 1},
+						math32.Vector3{X: x, Y: y - c.index, Z: z + 1},
 						geometry.QuadFaceNorth,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.North,
 					)
@@ -95,7 +94,7 @@ func (c *Chunklet) computeQuads() {
 
 				if x == 0 || c.centerChunk.GetBlockAt(iX-1, iY, iZ) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x, Y: y, Z: z},
+						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceEast,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.East,
 					)
@@ -103,7 +102,7 @@ func (c *Chunklet) computeQuads() {
 
 				if x == c.centerChunk.Size().X-1 || c.centerChunk.GetBlockAt(iX+1, iY, iZ) == nil {
 					c.AddNewQuad(
-						math32.Vector3{X: x + 1, Y: y, Z: z},
+						math32.Vector3{X: x + 1, Y: y - c.index, Z: z},
 						geometry.QuadFaceWest,
 						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.West,
 					)
@@ -111,8 +110,6 @@ func (c *Chunklet) computeQuads() {
 			}
 		}
 	}
-
-	//c.MergeQuads()
 }
 
 func (c *Chunklet) AddNewQuad(pos math32.Vector3, orientation uint8, material material.IMaterial) {

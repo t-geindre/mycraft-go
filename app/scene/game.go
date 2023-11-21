@@ -9,11 +9,11 @@ import (
 	"mycraft/camera"
 	"mycraft/mesh"
 	"mycraft/world"
-	"mycraft/world/generator"
+	"mycraft/world/generator/infinite"
 	"time"
 )
 
-const renderingDistance = 8 // chunks
+const renderingDistance = 10 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -49,7 +49,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
-	g.world = world.NewWorld(renderingDistance+1, generator.NewInfiniteRandomGenerator())
+	g.world = world.NewWorld(renderingDistance+1, infinite.NewSinGenerator(10, 20))
 
 	// Create world mesher
 	g.worldMesher = mesh.NewWorldMesher(renderingDistance * mesh.ChunkletSize)

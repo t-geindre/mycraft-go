@@ -65,11 +65,9 @@ MeshLoop:
 			meshPos.Y,
 		)
 		wm.meshes[meshPos] = mesh
-
 		if mesh == nil {
 			continue
 		}
-
 		wm.container.Add(mesh)
 	}
 }
@@ -110,7 +108,7 @@ func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 
 
 	missing := make([]math32.Vector3, 0)
 	for pos := range expectedPos {
-		if _, ok := wm.meshes[pos]; ok || pos.Y > world.ChunkHeight || pos.Y < 0 {
+		if _, ok := wm.meshes[pos]; ok || pos.Y >= world.ChunkHeight || pos.Y < 0 {
 			delete(expectedPos, pos)
 			continue
 		}
@@ -129,7 +127,13 @@ func (wm *WorldMesher) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 }
 
 func (wm *WorldMesher) clearToFarMeshes(pos math32.Vector3) {
+	meshCap := math32.Pow(wm.renderDistance/ChunkletSize, 3)
+	if len(wm.container.Children()) < int(meshCap) {
+		return
+	}
+
 	for meshPos, mesh := range wm.meshes {
+		// todo clear farest first until meshcap is reached
 		if math32.Abs(meshPos.X-pos.X) > wm.renderDistance ||
 			math32.Abs(meshPos.Y-pos.Y) > wm.renderDistance ||
 			math32.Abs(meshPos.Z-pos.Z) > wm.renderDistance {

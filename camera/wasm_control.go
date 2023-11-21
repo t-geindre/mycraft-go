@@ -38,9 +38,9 @@ type WASMControl struct {
 func NewWASMControl(cam *camera.Camera) *WASMControl {
 	wc := new(WASMControl)
 	wc.directions = DirectionStates{Forward: false, Backward: false, Left: false, Right: false}
-	wc.Acceleration = 1
-	wc.VelocityForwardCap = 10
-	wc.VelocitySidewardCap = 10
+	wc.Acceleration = 5
+	wc.VelocityForwardCap = 50
+	wc.VelocitySidewardCap = 50
 	wc.Camera = cam
 	wc.Sensitivity = 1
 

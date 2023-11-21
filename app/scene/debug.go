@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/gls"
-	"github.com/g3n/engine/graphic"
 	"github.com/g3n/engine/gui"
 	engineMaterial "github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
@@ -42,8 +41,7 @@ func NewDebugScene() *Debug {
 	d.Stats = []*DebugStat{
 		&DebugStat{label: "FPS", update: d.updateFps},
 		&DebugStat{label: "Scenes", update: d.updateScenes, delay: 500 * time.Millisecond},
-		&DebugStat{label: "Meshes", update: d.updateMeshes, delay: 1000 * time.Millisecond},
-		&DebugStat{label: "Polygons", update: d.updatePolygons, delay: 1000 * time.Millisecond},
+		&DebugStat{label: "Chunklets", update: d.updateMeshes, delay: 1000 * time.Millisecond},
 		&DebugStat{label: "Cam", update: d.updateCamPosition, delay: 300 * time.Millisecond},
 		&DebugStat{label: "Draw calls", update: d.updateDrawCalls},
 		&DebugStat{label: "Textures", update: d.updateTexturesCount},
@@ -177,10 +175,6 @@ func (d *Debug) updateMeshes(deltaTime time.Duration, label *gui.Label) {
 	label.SetText(fmt.Sprintf("%d", d.countMeshes(d.app.RootNode)))
 }
 
-func (d *Debug) updatePolygons(deltaTime time.Duration, label *gui.Label) {
-	label.SetText(fmt.Sprintf("%d", d.countPolygons(d.app.RootNode)))
-}
-
 func (d *Debug) updateDrawCalls(deltaTime time.Duration, label *gui.Label) {
 	stats := &gls.Stats{}
 	d.app.Engine.Gls().Stats(stats)
@@ -200,24 +194,10 @@ func (d *Debug) countMeshes(node *core.Node) int {
 	meshes := 0
 	for _, child := range node.Children() {
 		switch child.(type) {
-		case *graphic.Mesh:
+		case *mesh.Chunklet:
 			meshes++
 		case *core.Node:
 			meshes += d.countMeshes(child.(*core.Node))
-		}
-	}
-	return meshes
-}
-
-func (d *Debug) countPolygons(node *core.Node) int {
-	meshes := 0
-	for _, child := range node.Children() {
-		switch child.(type) {
-		case *graphic.Mesh:
-			indices := child.(*graphic.Mesh).GetGeometry().Indices()
-			meshes += indices.Len() / 3
-		case *core.Node:
-			meshes += d.countPolygons(child.(*core.Node))
 		}
 	}
 	return meshes
