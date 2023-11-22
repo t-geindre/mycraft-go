@@ -139,6 +139,7 @@ func (wm *WorldMesher) clearToFarMeshes(pos math32.Vector3) {
 			math32.Abs(meshPos.Z-pos.Z) > wm.renderDistance {
 			if mesh != nil {
 				wm.container.Remove(mesh)
+				mesh.GetGeometry().Dispose()
 			}
 			delete(wm.meshes, meshPos)
 		}

@@ -8,6 +8,7 @@ import (
 	"github.com/g3n/engine/math32"
 	"mycraft/mesh/geometry"
 	"mycraft/world"
+	"mycraft/world/block"
 )
 
 const ChunkletSize = 16
@@ -58,8 +59,6 @@ func (c *Chunklet) computeQuads() {
 					continue
 				}
 
-				// todo check neighbors
-
 				if y == c.centerChunk.Size().Y-1 || c.centerChunk.GetBlockAt(iX, iY+1, iZ) == nil {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y + 1 - c.index, Z: z},
@@ -76,7 +75,13 @@ func (c *Chunklet) computeQuads() {
 					)
 				}
 
-				if z == 0 || c.centerChunk.GetBlockAt(iX, iY, iZ-1) == nil {
+				var southBlock *block.Block = nil
+				if z == 0 {
+					southBlock = c.southChunk.GetBlockAt(iX, iY, int(c.southChunk.Size().Z)-1)
+				} else {
+					southBlock = c.centerChunk.GetBlockAt(iX, iY, iZ-1)
+				}
+				if southBlock == nil {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceSouth,
@@ -84,7 +89,13 @@ func (c *Chunklet) computeQuads() {
 					)
 				}
 
-				if z == c.centerChunk.Size().Z-1 || c.centerChunk.GetBlockAt(iX, iY, iZ+1) == nil {
+				var northBlock *block.Block = nil
+				if z == c.centerChunk.Size().Z-1 {
+					northBlock = c.northChunk.GetBlockAt(iX, iY, 0)
+				} else {
+					northBlock = c.centerChunk.GetBlockAt(iX, iY, iZ+1)
+				}
+				if northBlock == nil {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z + 1},
 						geometry.QuadFaceNorth,
@@ -92,7 +103,13 @@ func (c *Chunklet) computeQuads() {
 					)
 				}
 
-				if x == 0 || c.centerChunk.GetBlockAt(iX-1, iY, iZ) == nil {
+				var westBlock *block.Block = nil
+				if x == 0 {
+					westBlock = c.westChunk.GetBlockAt(int(c.westChunk.Size().X)-1, iY, iZ)
+				} else {
+					westBlock = c.centerChunk.GetBlockAt(iX-1, iY, iZ)
+				}
+				if westBlock == nil {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceEast,
@@ -100,7 +117,13 @@ func (c *Chunklet) computeQuads() {
 					)
 				}
 
-				if x == c.centerChunk.Size().X-1 || c.centerChunk.GetBlockAt(iX+1, iY, iZ) == nil {
+				var eastBlock *block.Block = nil
+				if x == c.centerChunk.Size().X-1 {
+					eastBlock = c.eastChunk.GetBlockAt(0, iY, iZ)
+				} else {
+					eastBlock = c.centerChunk.GetBlockAt(iX+1, iY, iZ)
+				}
+				if eastBlock == nil {
 					c.AddNewQuad(
 						math32.Vector3{X: x + 1, Y: y - c.index, Z: z},
 						geometry.QuadFaceWest,
