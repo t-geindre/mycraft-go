@@ -12,7 +12,7 @@ const (
 	BlockWater
 )
 
-type blockDefMaterials struct {
+type BlockMaterials struct {
 	Top    material.IMaterial
 	Bottom material.IMaterial
 	North  material.IMaterial
@@ -21,17 +21,18 @@ type blockDefMaterials struct {
 	West   material.IMaterial
 }
 
-type blockDef struct {
+type Block struct {
+	Id          uint16
 	Transparent bool
-	Materials   blockDefMaterials
+	Materials   BlockMaterials
 }
 
-func blockReference() map[uint16]blockDef {
-	ref := make(map[uint16]blockDef)
+func blockReference() map[uint16]*Block {
+	ref := make(map[uint16]*Block)
 	matRepo := matRef.GetRepository()
 
-	ref[BlockGrass] = blockDef{
-		Materials: blockDefMaterials{
+	ref[BlockGrass] = &Block{
+		Materials: BlockMaterials{
 			Top:    matRepo.Get(matRef.BlockGrassTop),
 			Bottom: matRepo.Get(matRef.BlockDirt),
 			North:  matRepo.Get(matRef.BlockGrassSide),
@@ -41,8 +42,8 @@ func blockReference() map[uint16]blockDef {
 		},
 	}
 
-	ref[BlockDirt] = blockDef{
-		Materials: blockDefMaterials{
+	ref[BlockDirt] = &Block{
+		Materials: BlockMaterials{
 			Top:    matRepo.Get(matRef.BlockDirt),
 			Bottom: matRepo.Get(matRef.BlockDirt),
 			North:  matRepo.Get(matRef.BlockDirt),
@@ -52,8 +53,8 @@ func blockReference() map[uint16]blockDef {
 		},
 	}
 
-	ref[BlockStone] = blockDef{
-		Materials: blockDefMaterials{
+	ref[BlockStone] = &Block{
+		Materials: BlockMaterials{
 			Top:    matRepo.Get(matRef.BlockStone),
 			Bottom: matRepo.Get(matRef.BlockStone),
 			North:  matRepo.Get(matRef.BlockStone),
@@ -63,9 +64,9 @@ func blockReference() map[uint16]blockDef {
 		},
 	}
 
-	ref[BlockWater] = blockDef{
+	ref[BlockWater] = &Block{
 		Transparent: true,
-		Materials: blockDefMaterials{
+		Materials: BlockMaterials{
 			Top:    matRepo.Get(matRef.BlockWater),
 			Bottom: matRepo.Get(matRef.BlockWater),
 			North:  matRepo.Get(matRef.BlockWater),

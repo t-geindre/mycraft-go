@@ -5,43 +5,24 @@ import (
 )
 
 type Repository struct {
-	blocks map[uint16]func() *Block
+	blocks map[uint16]*Block
 }
 
 var RepositoryInstance *Repository
 
 func (r *Repository) Get(id uint16) *Block {
 	if block, ok := r.blocks[id]; ok {
-		return block()
+		return block
 	}
 	panic(fmt.Errorf(`unknown block "%s"`, id))
 }
 
 func newRepository() *Repository {
 	r := new(Repository)
-	r.blocks = make(map[uint16]func() *Block)
-
-	for id, def := range blockReference() {
-		r.blocks[id] = func(def blockDef, id uint16) func() *Block {
-			return func() *Block {
-				b := Block{
-					Id:          id,
-					Transparent: def.Transparent,
-				}
-				b.Materials = BlockMaterials{
-					Top:    def.Materials.Top,
-					Bottom: def.Materials.Bottom,
-					North:  def.Materials.North,
-					South:  def.Materials.South,
-					East:   def.Materials.East,
-					West:   def.Materials.West,
-				}
-
-				return &b
-			}
-		}(def, id)
+	r.blocks = blockReference()
+	for id, block := range r.blocks {
+		block.Id = id
 	}
-
 	return r
 }
 
