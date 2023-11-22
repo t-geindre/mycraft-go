@@ -86,17 +86,47 @@ func (q *Quad) Vertices() []float32 {
 func (q *Quad) Normals() []float32 {
 	switch q.orientation {
 	case QuadFaceUp:
-		return []float32{0, 1, 0}
+		return []float32{
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+		}
 	case QuadFaceDown:
-		return []float32{0, -1, 0}
+		return []float32{
+			0, -1, 0,
+			0, -1, 0,
+			0, -1, 0,
+			0, -1, 0,
+		}
 	case QuadFaceNorth:
-		return []float32{0, 0, -1}
+		return []float32{
+			0, 0, -1,
+			0, 0, -1,
+			0, 0, -1,
+			0, 0, -1,
+		}
 	case QuadFaceSouth:
-		return []float32{0, 0, 1}
+		return []float32{
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		}
 	case QuadFaceWest:
-		return []float32{-1, 0, 0}
+		return []float32{
+			-1, 0, 0,
+			-1, 0, 0,
+			-1, 0, 0,
+			-1, 0, 0,
+		}
 	case QuadFaceEast:
-		return []float32{1, 0, 0}
+		return []float32{
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+		}
 	}
 
 	panic("Invalid quad orientation")
