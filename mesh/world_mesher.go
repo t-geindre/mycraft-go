@@ -11,31 +11,31 @@ type WorldMesher struct {
 	meshes         map[math32.Vector3]*Chunklet
 	container      *core.Node
 	renderDistance float32 // chunks horizontal, chunklet vertical
-	lastPos        math32.Vector3
-	isDirty        bool
+	lastPos        *math32.Vector3
 }
 
 func NewWorldMesher(rd float32) *WorldMesher {
+	// todo add a meshing go routine to avoid rendering lag
 	wm := new(WorldMesher)
 	wm.chunks = make(map[math32.Vector2]*world.Chunk)
 	wm.meshes = make(map[math32.Vector3]*Chunklet)
 	wm.container = core.NewNode()
 	wm.renderDistance = rd
-	wm.isDirty = true
 	return wm
 }
 
 func (wm *WorldMesher) Update(pos math32.Vector3) {
 	pos = wm.getWorldPosition(pos)
-	if pos.Equals(&wm.lastPos) && !wm.isDirty {
+	if wm.lastPos != nil && pos.Equals(wm.lastPos) {
 		return
 	}
-	wm.isDirty = false
+	wm.lastPos = &pos
+	wm.doUpdate(*wm.lastPos)
+}
 
+func (wm *WorldMesher) doUpdate(pos math32.Vector3) {
 	wm.addMissingMeshes(pos)
 	wm.clearToFarMeshes(pos)
-
-	wm.lastPos = pos
 }
 
 func (wm *WorldMesher) addMissingMeshes(pos math32.Vector3) {
@@ -51,7 +51,6 @@ MeshLoop:
 
 		for _, chunkPos := range requiredChunks {
 			if _, ok := wm.chunks[chunkPos]; !ok {
-				wm.isDirty = true
 				continue MeshLoop
 			}
 		}
@@ -78,6 +77,7 @@ func (wm *WorldMesher) Container() *core.Node {
 
 func (wm *WorldMesher) AddChunk(chunk *world.Chunk) {
 	wm.chunks[*chunk.Position()] = chunk
+	wm.doUpdate(*wm.lastPos)
 }
 
 func (wm *WorldMesher) RemoveChunk(chunk *world.Chunk) {

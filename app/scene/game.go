@@ -49,6 +49,9 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
 	g.container.Add(dl)
 
+	// Add skybox
+	g.container.Add(mesh.NewSkybox())
+
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
 	g.world = world.NewWorld(renderingDistance+1, infinite.NewNoiseGenerator(1)) //infinite.NewSinGenerator(10, 20))
