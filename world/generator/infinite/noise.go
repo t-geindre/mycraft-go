@@ -29,19 +29,19 @@ func (n *Noise) Populate(chunk *world.Chunk) {
 			groundLevel := n.GetGroundLevelAt(cX, cZ)
 			for y := 0; y < world.ChunkHeight; y++ {
 				cY := float32(y)
-				if cY > groundLevel && cY < 90 {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.WaterBlock))
-				}
 
 				if cY == groundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.GrassBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockGrass))
 					continue
 				}
 				if cY < groundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.DirtBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockDirt))
 					continue
 				}
 
+				if cY > groundLevel && cY < 90 {
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockWater))
+				}
 			}
 		}
 	}

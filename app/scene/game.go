@@ -42,10 +42,12 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app.Engine.SubscribeID(window.OnKeyDown, &g, g.onKeyDown)
 
 	// Create and add lights
-	g.container.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1))
-
-	// Set background color to some blue todo : add skybox
-	g.app.Engine.Gls().ClearColor(.5, .5, .8, 1.0)
+	// todo check how we can maybe set how materials react to light SetUseLights()
+	g.container.Add(light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, .5))
+	dl := light.NewDirectional(&math32.Color{R: 1, G: 1, B: 1}, .8)
+	dl.SetDirectionVec(&math32.Vector3{X: 0, Y: -1, Z: 0})
+	dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
+	g.container.Add(dl)
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered

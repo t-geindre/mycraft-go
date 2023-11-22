@@ -27,11 +27,11 @@ func (i *Sin) Populate(chunk *world.Chunk) {
 			for y := 0; y < world.ChunkHeight; y++ {
 				cY := float32(y)
 				if cY < groundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.DirtBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockDirt))
 					continue
 				}
 				if cY == groundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.GrassBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockGrass))
 					continue
 				}
 			}

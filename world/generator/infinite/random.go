@@ -16,11 +16,11 @@ func (g *Random) Populate(chunk *world.Chunk) {
 			gLevel := rand.Intn(31) + 1
 			for y := 0; y < world.ChunkHeight; y++ {
 				if y == gLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.GrassBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockGrass))
 					continue
 				}
 				if y < gLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.DirtBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockDirt))
 				}
 			}
 		}

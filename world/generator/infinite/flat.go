@@ -16,11 +16,11 @@ func (g *Flat) Populate(chunk *world.Chunk) {
 		for z := 0; z < world.ChunkDepth; z++ {
 			for y := 0; y < world.ChunkHeight; y++ {
 				if y == GroundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.GrassBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockGrass))
 					continue
 				}
 				if y < GroundLevel {
-					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.DirtBlock))
+					chunk.SetBlockAt(x, y, z, blockRepository.Get(block.BlockDirt))
 				}
 			}
 		}

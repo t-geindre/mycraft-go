@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	GrassBlock = iota
-	DirtBlock
-	StoneBlock
-	WaterBlock
+	BlockGrass = iota
+	BlockDirt
+	BlockStone
+	BlockWater
 )
 
 type blockDefMaterials struct {
@@ -30,48 +30,48 @@ func blockReference() map[uint16]blockDef {
 	ref := make(map[uint16]blockDef)
 	matRepo := matRef.GetRepository()
 
-	ref[GrassBlock] = blockDef{
+	ref[BlockGrass] = blockDef{
 		Materials: blockDefMaterials{
-			Top:    matRepo.Get(matRef.GrassBlockTop),
-			Bottom: matRepo.Get(matRef.DirtBlock),
-			North:  matRepo.Get(matRef.GrassBlockSide),
-			South:  matRepo.Get(matRef.GrassBlockSide),
-			East:   matRepo.Get(matRef.GrassBlockSide),
-			West:   matRepo.Get(matRef.GrassBlockSide),
+			Top:    matRepo.Get(matRef.BlockGrassTop),
+			Bottom: matRepo.Get(matRef.BlockDirt),
+			North:  matRepo.Get(matRef.BlockGrassSide),
+			South:  matRepo.Get(matRef.BlockGrassSide),
+			East:   matRepo.Get(matRef.BlockGrassSide),
+			West:   matRepo.Get(matRef.BlockGrassSide),
 		},
 	}
 
-	ref[DirtBlock] = blockDef{
+	ref[BlockDirt] = blockDef{
 		Materials: blockDefMaterials{
-			Top:    matRepo.Get(matRef.DirtBlock),
-			Bottom: matRepo.Get(matRef.WaterBlock),
-			North:  matRepo.Get(matRef.DirtBlock),
-			South:  matRepo.Get(matRef.DirtBlock),
-			East:   matRepo.Get(matRef.DirtBlock),
-			West:   matRepo.Get(matRef.DirtBlock),
+			Top:    matRepo.Get(matRef.BlockDirt),
+			Bottom: matRepo.Get(matRef.BlockDirt),
+			North:  matRepo.Get(matRef.BlockDirt),
+			South:  matRepo.Get(matRef.BlockDirt),
+			East:   matRepo.Get(matRef.BlockDirt),
+			West:   matRepo.Get(matRef.BlockDirt),
 		},
 	}
 
-	ref[StoneBlock] = blockDef{
+	ref[BlockStone] = blockDef{
 		Materials: blockDefMaterials{
-			Top:    matRepo.Get(matRef.StoneBlock),
-			Bottom: matRepo.Get(matRef.StoneBlock),
-			North:  matRepo.Get(matRef.StoneBlock),
-			South:  matRepo.Get(matRef.StoneBlock),
-			East:   matRepo.Get(matRef.StoneBlock),
-			West:   matRepo.Get(matRef.StoneBlock),
+			Top:    matRepo.Get(matRef.BlockStone),
+			Bottom: matRepo.Get(matRef.BlockStone),
+			North:  matRepo.Get(matRef.BlockStone),
+			South:  matRepo.Get(matRef.BlockStone),
+			East:   matRepo.Get(matRef.BlockStone),
+			West:   matRepo.Get(matRef.BlockStone),
 		},
 	}
 
-	ref[WaterBlock] = blockDef{
+	ref[BlockWater] = blockDef{
 		Transparent: true,
 		Materials: blockDefMaterials{
-			Top:    matRepo.Get(matRef.WaterBlock),
-			Bottom: matRepo.Get(matRef.WaterBlock),
-			North:  matRepo.Get(matRef.WaterBlock),
-			South:  matRepo.Get(matRef.WaterBlock),
-			East:   matRepo.Get(matRef.WaterBlock),
-			West:   matRepo.Get(matRef.WaterBlock),
+			Top:    matRepo.Get(matRef.BlockWater),
+			Bottom: matRepo.Get(matRef.BlockWater),
+			North:  matRepo.Get(matRef.BlockWater),
+			South:  matRepo.Get(matRef.BlockWater),
+			East:   matRepo.Get(matRef.BlockWater),
+			West:   matRepo.Get(matRef.BlockWater),
 		},
 	}
 
