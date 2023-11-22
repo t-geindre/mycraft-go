@@ -10,6 +10,7 @@ const (
 	GrassBlockSide
 	DirtBlock
 	StoneBlock
+	WaterBlock
 )
 
 type materialDef struct {
@@ -38,6 +39,15 @@ func materialReference() map[uint16]materialDef {
 
 	ref[StoneBlock] = materialDef{
 		TextureFile: "assets/block/stone.png",
+	}
+
+	ref[WaterBlock] = materialDef{
+		Transparent: true,
+		Setup: func(m *material.Standard) {
+			m.SetColor(&math32.Color{R: 0.2, G: 0.4, B: 0.8})
+			m.SetOpacity(0.8)
+			m.SetTransparent(true)
+		},
 	}
 
 	return ref

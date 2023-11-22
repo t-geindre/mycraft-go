@@ -49,7 +49,9 @@ func newRepository() *Repository {
 
 	for id, mat := range materialReference() {
 		m := material.NewStandard(&math32.Color{R: 1, G: 1, B: 1})
-		m.AddTexture(r.getTexture(mat.TextureFile))
+		if mat.TextureFile != "" {
+			m.AddTexture(r.getTexture(mat.TextureFile))
+		}
 		if mat.Setup != nil {
 			mat.Setup(m)
 		}

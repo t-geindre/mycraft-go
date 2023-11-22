@@ -33,7 +33,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app = app
 
 	// Set WASM camera control
-	g.app.Cam.SetPosition(0, 10, 0)
+	g.app.Cam.SetPosition(0, 100, 0)
 	g.camControl = camera.NewWASMControl(g.app.Cam)
 	g.camControl.CaptureMouse(g.app.GlsWindow)
 
@@ -42,14 +42,14 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app.Engine.SubscribeID(window.OnKeyDown, &g, g.onKeyDown)
 
 	// Create and add lights
-	g.container.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1.1))
+	g.container.Add(light.NewAmbient(&math32.Color{R: 1.0, G: 1.0, B: 1.0}, 1))
 
 	// Set background color to some blue todo : add skybox
 	g.app.Engine.Gls().ClearColor(.5, .5, .8, 1.0)
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
-	g.world = world.NewWorld(renderingDistance+1, infinite.NewSinGenerator(10, 20))
+	g.world = world.NewWorld(renderingDistance+1, infinite.NewNoiseGenerator(1)) //infinite.NewSinGenerator(10, 20))
 
 	// Create world mesher
 	g.worldMesher = mesh.NewWorldMesher(renderingDistance * mesh.ChunkletSize)

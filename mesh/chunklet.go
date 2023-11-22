@@ -51,27 +51,39 @@ func (c *Chunklet) computeQuads() {
 	c.quadsOptimized = make([]*geometry.Quad, 0)
 	c.quadsByMatOrient = make(map[material.IMaterial]map[uint8][]*geometry.Quad)
 
+	// Todo there must be a way to factorize this code
+
 	for x := float32(0); x < c.centerChunk.Size().X; x++ {
 		for y := c.index; y < c.index+ChunkletSize; y++ {
 			for z := float32(0); z < c.centerChunk.Size().Z; z++ {
 				iX, iY, iZ := int(x), int(y), int(z)
-				if c.centerChunk.GetBlockAt(iX, iY, iZ) == nil {
+				currentBlock := c.centerChunk.GetBlockAt(iX, iY, iZ)
+
+				if currentBlock == nil {
 					continue
 				}
 
-				if y == c.centerChunk.Size().Y-1 || c.centerChunk.GetBlockAt(iX, iY+1, iZ) == nil {
+				var topBlock *block.Block
+				if y < c.centerChunk.Size().Y {
+					topBlock = c.centerChunk.GetBlockAt(iX, iY+1, iZ)
+				}
+				if topBlock == nil || (topBlock.Transparent && topBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y + 1 - c.index, Z: z},
 						geometry.QuadFaceUp,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.Top,
+						currentBlock.Materials.Top,
 					)
 				}
 
-				if y == 0 || c.centerChunk.GetBlockAt(iX, iY-1, iZ) == nil {
+				var bottomBlock *block.Block
+				if y > 0 {
+					bottomBlock = c.centerChunk.GetBlockAt(iX, iY-1, iZ)
+				}
+				if bottomBlock == nil || (bottomBlock.Transparent && bottomBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceDown,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.Bottom,
+						currentBlock.Materials.Bottom,
 					)
 				}
 
@@ -81,11 +93,11 @@ func (c *Chunklet) computeQuads() {
 				} else {
 					southBlock = c.centerChunk.GetBlockAt(iX, iY, iZ-1)
 				}
-				if southBlock == nil {
+				if southBlock == nil || (southBlock.Transparent && southBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceSouth,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.South,
+						currentBlock.Materials.South,
 					)
 				}
 
@@ -95,11 +107,11 @@ func (c *Chunklet) computeQuads() {
 				} else {
 					northBlock = c.centerChunk.GetBlockAt(iX, iY, iZ+1)
 				}
-				if northBlock == nil {
+				if northBlock == nil || (northBlock.Transparent && northBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z + 1},
 						geometry.QuadFaceNorth,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.North,
+						currentBlock.Materials.North,
 					)
 				}
 
@@ -109,11 +121,11 @@ func (c *Chunklet) computeQuads() {
 				} else {
 					westBlock = c.centerChunk.GetBlockAt(iX-1, iY, iZ)
 				}
-				if westBlock == nil {
+				if westBlock == nil || (westBlock.Transparent && westBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x, Y: y - c.index, Z: z},
 						geometry.QuadFaceEast,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.East,
+						currentBlock.Materials.East,
 					)
 				}
 
@@ -123,11 +135,11 @@ func (c *Chunklet) computeQuads() {
 				} else {
 					eastBlock = c.centerChunk.GetBlockAt(iX+1, iY, iZ)
 				}
-				if eastBlock == nil {
+				if eastBlock == nil || (eastBlock.Transparent && eastBlock.Id != currentBlock.Id) {
 					c.AddNewQuad(
 						math32.Vector3{X: x + 1, Y: y - c.index, Z: z},
 						geometry.QuadFaceWest,
-						c.centerChunk.GetBlockAt(iX, iY, iZ).Materials.West,
+						currentBlock.Materials.West,
 					)
 				}
 			}

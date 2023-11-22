@@ -12,5 +12,7 @@ type BlockMaterials struct {
 }
 
 type Block struct {
-	Materials BlockMaterials
+	Id          uint16
+	Transparent bool
+	Materials   BlockMaterials
 }

@@ -22,9 +22,12 @@ func newRepository() *Repository {
 	r.blocks = make(map[uint16]func() *Block)
 
 	for id, def := range blockReference() {
-		r.blocks[id] = func(def blockDef) func() *Block {
+		r.blocks[id] = func(def blockDef, id uint16) func() *Block {
 			return func() *Block {
-				b := Block{}
+				b := Block{
+					Id:          id,
+					Transparent: def.Transparent,
+				}
 				b.Materials = BlockMaterials{
 					Top:    def.Materials.Top,
 					Bottom: def.Materials.Bottom,
@@ -36,7 +39,7 @@ func newRepository() *Repository {
 
 				return &b
 			}
-		}(def)
+		}(def, id)
 	}
 
 	return r

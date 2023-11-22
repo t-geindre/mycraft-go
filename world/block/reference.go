@@ -9,6 +9,7 @@ const (
 	GrassBlock = iota
 	DirtBlock
 	StoneBlock
+	WaterBlock
 )
 
 type blockDefMaterials struct {
@@ -21,7 +22,8 @@ type blockDefMaterials struct {
 }
 
 type blockDef struct {
-	Materials blockDefMaterials
+	Transparent bool
+	Materials   blockDefMaterials
 }
 
 func blockReference() map[uint16]blockDef {
@@ -42,7 +44,7 @@ func blockReference() map[uint16]blockDef {
 	ref[DirtBlock] = blockDef{
 		Materials: blockDefMaterials{
 			Top:    matRepo.Get(matRef.DirtBlock),
-			Bottom: matRepo.Get(matRef.DirtBlock),
+			Bottom: matRepo.Get(matRef.WaterBlock),
 			North:  matRepo.Get(matRef.DirtBlock),
 			South:  matRepo.Get(matRef.DirtBlock),
 			East:   matRepo.Get(matRef.DirtBlock),
@@ -58,6 +60,18 @@ func blockReference() map[uint16]blockDef {
 			South:  matRepo.Get(matRef.StoneBlock),
 			East:   matRepo.Get(matRef.StoneBlock),
 			West:   matRepo.Get(matRef.StoneBlock),
+		},
+	}
+
+	ref[WaterBlock] = blockDef{
+		Transparent: true,
+		Materials: blockDefMaterials{
+			Top:    matRepo.Get(matRef.WaterBlock),
+			Bottom: matRepo.Get(matRef.WaterBlock),
+			North:  matRepo.Get(matRef.WaterBlock),
+			South:  matRepo.Get(matRef.WaterBlock),
+			East:   matRepo.Get(matRef.WaterBlock),
+			West:   matRepo.Get(matRef.WaterBlock),
 		},
 	}
 
