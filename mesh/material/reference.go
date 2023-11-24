@@ -11,6 +11,7 @@ const (
 	BlockDirt
 	BlockStone
 	BlockWater
+	BlockSand
 )
 
 type materialDef struct {
@@ -39,6 +40,10 @@ func materialReference() map[uint16]materialDef {
 
 	ref[BlockStone] = materialDef{
 		TextureFile: "assets/block/stone.png",
+	}
+
+	ref[BlockSand] = materialDef{
+		TextureFile: "assets/block/sand.png",
 	}
 
 	ref[BlockWater] = materialDef{

@@ -10,6 +10,7 @@ import (
 	"mycraft/mesh"
 	"mycraft/world"
 	"mycraft/world/generator"
+	"mycraft/world/generator/noise"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app = app
 
 	// Set WASM camera control
-	g.app.Cam.SetPosition(0, 100, 0)
+	g.app.Cam.SetPosition(0, 50, 0)
 	g.camControl = camera.NewWASMControl(g.app.Cam)
 	g.camControl.CaptureMouse(g.app.GlsWindow)
 
@@ -54,7 +55,13 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
-	g.world = world.NewWorld(renderingDistance+1, generator.NewNoiseGenerator(1))
+	g.world = world.NewWorld(
+		renderingDistance+1,
+		generator.NewSimpleGenerator(
+			noise.NewOctaveSimplexNoise(1), //noise.NewOctaveSimplexNoise(1),
+			20,
+		),
+	)
 
 	// Create world mesher
 	g.worldMesher = mesh.NewWorldMesher(renderingDistance * mesh.ChunkletSize)
