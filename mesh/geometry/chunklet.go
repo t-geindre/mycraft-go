@@ -33,6 +33,7 @@ func (c *Chunklet) computeQuads(chunk, east, west, north, south *world.Chunk, in
 	quads := make([]*Quad, 0, 16*16*16)
 
 	// Todo there must be a way to factorize this code
+	// Todo translate x,y to center chunklet
 
 	for x := float32(0); x < chunk.Size().X; x++ {
 		for y := index; y < index+ChunkletSize; y++ {

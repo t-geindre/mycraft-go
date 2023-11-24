@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const renderingDistance = 10 // chunks
+const renderingDistance = 20 // chunks
 
 type Game struct {
 	container      *core.Node

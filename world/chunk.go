@@ -13,6 +13,7 @@ type Chunk struct {
 	blocks   [ChunkWith][ChunkHeight][ChunkDepth]*block.Block
 	position *math32.Vector2
 	size     *math32.Vector3
+	isEmpty  bool
 }
 
 func NewChunk(pos math32.Vector2) *Chunk {

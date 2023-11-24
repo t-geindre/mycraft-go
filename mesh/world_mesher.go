@@ -9,10 +9,21 @@ import (
 type WorldMesher struct {
 	chunks         map[math32.Vector2]*world.Chunk
 	meshes         map[math32.Vector3]*Chunklet
+	meshesQueue    *ChunkletQueue
 	container      *core.Node
 	renderDistance float32 // chunks horizontal, chunklet vertical
 	lastPos        *math32.Vector3
 }
+
+const meshQueryPackSize = 20
+
+const (
+	chunkCenter = iota
+	chunkEast
+	chunkWest
+	chunkNorth
+	chunkSouth
+)
 
 func NewWorldMesher(rd float32) *WorldMesher {
 	// todo add a meshing go routine to avoid rendering lag
@@ -21,14 +32,26 @@ func NewWorldMesher(rd float32) *WorldMesher {
 	wm.meshes = make(map[math32.Vector3]*Chunklet)
 	wm.container = core.NewNode()
 	wm.renderDistance = rd
+
+	wm.meshesQueue = NewChunkletQueue(20, 1, func(chunklet *Chunklet) {
+		if chunklet == nil {
+			return
+		}
+		wm.meshes[chunklet.Position()] = chunklet
+		wm.container.Add(chunklet)
+	})
+
 	return wm
 }
 
 func (wm *WorldMesher) Update(pos math32.Vector3) {
+	wm.meshesQueue.Pull()
+
 	pos = wm.getWorldPosition(pos)
 	if wm.lastPos != nil && pos.Equals(wm.lastPos) {
 		return
 	}
+
 	wm.lastPos = &pos
 	wm.doUpdate(*wm.lastPos)
 }
@@ -41,12 +64,12 @@ func (wm *WorldMesher) doUpdate(pos math32.Vector3) {
 func (wm *WorldMesher) addMissingMeshes(pos math32.Vector3) {
 MeshLoop:
 	for _, meshPos := range wm.getMissingMeshesPos(pos) {
-		requiredChunks := map[string]math32.Vector2{
-			"center": {X: meshPos.X, Y: meshPos.Z},
-			"east":   {X: meshPos.X + world.ChunkWith, Y: meshPos.Z},
-			"west":   {X: meshPos.X - world.ChunkWith, Y: meshPos.Z},
-			"north":  {X: meshPos.X, Y: meshPos.Z + world.ChunkDepth},
-			"south":  {X: meshPos.X, Y: meshPos.Z - world.ChunkDepth},
+		requiredChunks := [...]math32.Vector2{
+			chunkCenter: {X: meshPos.X, Y: meshPos.Z},
+			chunkEast:   {X: meshPos.X + world.ChunkWith, Y: meshPos.Z},
+			chunkWest:   {X: meshPos.X - world.ChunkWith, Y: meshPos.Z},
+			chunkNorth:  {X: meshPos.X, Y: meshPos.Z + world.ChunkDepth},
+			chunkSouth:  {X: meshPos.X, Y: meshPos.Z - world.ChunkDepth},
 		}
 
 		for _, chunkPos := range requiredChunks {
@@ -55,20 +78,19 @@ MeshLoop:
 			}
 		}
 
-		mesh := NewChunklet(
-			wm.chunks[requiredChunks["center"]],
-			wm.chunks[requiredChunks["east"]],
-			wm.chunks[requiredChunks["west"]],
-			wm.chunks[requiredChunks["north"]],
-			wm.chunks[requiredChunks["south"]],
-			meshPos.Y,
-		)
-		wm.meshes[meshPos] = mesh
-		if mesh == nil {
-			continue
-		}
-		wm.container.Add(mesh)
+		// avoid further generation query
+		wm.meshes[meshPos] = nil
+
+		wm.meshesQueue.Push(ChunkletQuery{
+			Pos:    meshPos,
+			Center: wm.chunks[requiredChunks[chunkCenter]],
+			East:   wm.chunks[requiredChunks[chunkEast]],
+			West:   wm.chunks[requiredChunks[chunkWest]],
+			North:  wm.chunks[requiredChunks[chunkNorth]],
+			South:  wm.chunks[requiredChunks[chunkSouth]],
+		})
 	}
+
 }
 
 func (wm *WorldMesher) Container() *core.Node {
@@ -85,34 +107,17 @@ func (wm *WorldMesher) RemoveChunk(chunk *world.Chunk) {
 }
 
 func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 {
-	expectedPos := map[math32.Vector3]bool{}
-
-	for westX, eastX := pos.X, pos.X; eastX <= pos.X+wm.renderDistance; westX, eastX = westX-world.ChunkWith, eastX+world.ChunkWith {
-		for bottomY, topY := pos.Y, pos.Y; topY <= pos.Y+wm.renderDistance; bottomY, topY = bottomY-ChunkletSize, topY+ChunkletSize {
-			for northZ, southZ := pos.Z, pos.Z; southZ <= pos.Z+wm.renderDistance; northZ, southZ = northZ-world.ChunkDepth, southZ+world.ChunkDepth {
-				for _, meshPos := range []math32.Vector3{
-					{X: eastX, Y: bottomY, Z: northZ},
-					{X: eastX, Y: bottomY, Z: southZ},
-					{X: eastX, Y: topY, Z: northZ},
-					{X: eastX, Y: topY, Z: southZ},
-					{X: westX, Y: bottomY, Z: northZ},
-					{X: westX, Y: bottomY, Z: southZ},
-					{X: westX, Y: topY, Z: northZ},
-					{X: westX, Y: topY, Z: southZ},
-				} {
-					expectedPos[meshPos] = true
+	missing := make([]math32.Vector3, 0, 100)
+	for x := pos.X - wm.renderDistance; x <= pos.X+wm.renderDistance; x += world.ChunkWith {
+		for z := pos.Z - wm.renderDistance; z <= pos.Z+wm.renderDistance; z += world.ChunkDepth {
+			for y := math32.Max(0, pos.Y-wm.renderDistance); y < math32.Min(pos.Y+wm.renderDistance, world.ChunkHeight); y += ChunkletSize {
+				newPos := math32.Vector3{X: x, Y: y, Z: z}
+				if _, ok := wm.meshes[newPos]; ok {
+					continue
 				}
+				missing = append(missing, newPos)
 			}
 		}
-	}
-
-	missing := make([]math32.Vector3, 0)
-	for pos := range expectedPos {
-		if _, ok := wm.meshes[pos]; ok || pos.Y >= world.ChunkHeight || pos.Y < 0 {
-			delete(expectedPos, pos)
-			continue
-		}
-		missing = append(missing, pos)
 	}
 
 	return missing

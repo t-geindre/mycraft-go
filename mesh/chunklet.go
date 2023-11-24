@@ -2,6 +2,7 @@ package mesh
 
 import (
 	"github.com/g3n/engine/graphic"
+	"github.com/g3n/engine/math32"
 	"mycraft/mesh/geometry"
 	"mycraft/world"
 )
@@ -12,22 +13,19 @@ type Chunklet struct {
 	*graphic.Mesh
 }
 
-func NewChunklet(chunk, east, west, north, south *world.Chunk, index float32) *Chunklet {
-	geo := geometry.NewChunkletGeometry(chunk, east, west, north, south, index)
+func NewChunklet(chunk, east, west, north, south *world.Chunk, pos math32.Vector3) *Chunklet {
+	geo := geometry.NewChunkletGeometry(chunk, east, west, north, south, pos.Y)
 	if geo == nil {
 		return nil
 	}
 
 	c := new(Chunklet)
-
-	mesh := graphic.NewMesh(geo, nil)
+	c.Mesh = graphic.NewMesh(geo, nil)
+	c.Mesh.SetPositionVec(&pos)
 
 	for mat, groupId := range geo.MaterialMap() {
-		mesh.AddGroupMaterial(mat, groupId)
+		c.Mesh.AddGroupMaterial(mat, groupId)
 	}
-
-	c.Mesh = mesh
-	c.Mesh.SetPosition(chunk.Position().X, index, chunk.Position().Y)
 
 	return c
 }

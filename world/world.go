@@ -15,7 +15,7 @@ type World struct {
 	removeChunkChan chan []*Chunk
 }
 
-const chunkChanPackSize = 20
+const chunkChanPackSize = 10
 
 func NewWorld(rd float32, generator Generator) *World {
 	w := new(World)
@@ -25,6 +25,7 @@ func NewWorld(rd float32, generator Generator) *World {
 	w.posChan = make(chan math32.Vector2, 1)
 	w.addChunkChan = make(chan []*Chunk, chunkChanPackSize)
 	w.removeChunkChan = make(chan []*Chunk, chunkChanPackSize)
+	// todo make sure the go routine is stopped when the world is destroyed
 	go w.Run()
 	return w
 }

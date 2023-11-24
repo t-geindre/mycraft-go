@@ -49,10 +49,10 @@ func (n *Noise) Populate(chunk *world.Chunk) {
 
 func (n *Noise) GetGroundLevelAt(x, z float32) float32 {
 	noise := float32(50)
-	pv := n.noise.Eval2(x/200, z/200)
+	pvNoise := n.noise.Eval2(x/200, z/200)
 
-	noise += n.noise.Eval2(x/50, z/50) * 80 * pv
-	noise += n.noise.Eval2(x/5000, z/5000) * 80 * (1 - pv)
+	noise += n.noise.Eval2(x/50, z/50) * 100 * pvNoise
+	noise += n.noise.Eval2(x/5000, z/5000) * 100 * (1 - pvNoise)
 
 	noise += n.noise.Eval2(x/5, z/5) * 2
 
