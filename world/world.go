@@ -2,6 +2,7 @@ package world
 
 import (
 	"github.com/g3n/engine/math32"
+	"mycraft/world/block"
 )
 
 type World struct {
@@ -13,6 +14,7 @@ type World struct {
 	initialized     bool
 	addChunkChan    chan []*Chunk
 	removeChunkChan chan []*Chunk
+	blocks          *block.Repository
 }
 
 const chunkChanPackSize = 10
@@ -25,6 +27,7 @@ func NewWorld(rd float32, generator Generator) *World {
 	w.posChan = make(chan math32.Vector2, 1)
 	w.addChunkChan = make(chan []*Chunk, chunkChanPackSize)
 	w.removeChunkChan = make(chan []*Chunk, chunkChanPackSize)
+	w.blocks = block.GetRepository()
 	// todo make sure the go routine is stopped when the world is destroyed
 	go w.Run()
 	return w
@@ -58,7 +61,7 @@ func (w *World) UpdateFromVec3(pos math32.Vector3) {
 
 func (*World) GetWorldCoordinates(pos math32.Vector3) math32.Vector2 {
 	return math32.Vector2{
-		X: float32(int(pos.X) / ChunkWith),
+		X: float32(int(pos.X) / ChunkWidth),
 		Y: float32(int(pos.Z) / ChunkDepth),
 	}
 }
@@ -78,11 +81,12 @@ func (w *World) addMissingChunks(pos math32.Vector2) {
 			chunkPos := math32.Vector2{X: x, Y: y}
 			if _, ok := w.chunks[chunkPos]; !ok {
 				chunkWorldPos := math32.Vector2{
-					X: float32(int(x) * ChunkWith),
+					X: float32(int(x) * ChunkWidth),
 					Y: float32(int(y) * ChunkDepth),
 				}
-				w.chunks[chunkPos] = NewChunk(chunkWorldPos)
-				w.generator.Populate(w.chunks[chunkPos])
+				chunk := NewChunk(chunkWorldPos)
+				w.PopulateChunk(chunk)
+				w.chunks[chunkPos] = chunk
 				addedChunks = append(addedChunks, w.chunks[chunkPos])
 
 				if len(addedChunks)%chunkChanPackSize == 0 {
@@ -115,4 +119,21 @@ func (w *World) clearTooFarChunks(pos math32.Vector2) {
 		w.removeChunkChan <- removedChunks
 		removedChunks = make([]*Chunk, 10)
 	}
+}
+
+func (w *World) PopulateChunk(chunk *Chunk) {
+	for x := 0; x < ChunkWidth; x++ {
+		cX := float32(x) + chunk.Position().X
+		for z := 0; z < ChunkDepth; z++ {
+			cZ := float32(z) + chunk.Position().Y
+			for y := 0; y < ChunkHeight; y++ {
+				cY := float32(y)
+				bid := w.generator.GetBlockAt(cX, cY, cZ)
+				if bid != block.BlockNone {
+					chunk.SetBlockAt(x, y, z, w.blocks.Get(bid))
+				}
+			}
+		}
+	}
+	w.generator.Reset()
 }

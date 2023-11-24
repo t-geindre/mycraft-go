@@ -1,5 +1,6 @@
 package world
 
 type Generator interface {
-	Populate(chunk *Chunk)
+	GetBlockAt(x, y, z float32) uint16
+	Reset()
 }

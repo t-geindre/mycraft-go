@@ -5,12 +5,12 @@ import (
 	"mycraft/world/block"
 )
 
-const ChunkWith = 16
+const ChunkWidth = 16
 const ChunkDepth = 16
 const ChunkHeight = 256
 
 type Chunk struct {
-	blocks   [ChunkWith][ChunkHeight][ChunkDepth]*block.Block
+	blocks   [ChunkWidth][ChunkHeight][ChunkDepth]*block.Block
 	position *math32.Vector2
 	size     *math32.Vector3
 	isEmpty  bool
@@ -20,7 +20,7 @@ func NewChunk(pos math32.Vector2) *Chunk {
 	c := new(Chunk)
 	c.position = &pos
 	c.size = &math32.Vector3{
-		X: ChunkWith,
+		X: ChunkWidth,
 		Y: ChunkHeight,
 		Z: ChunkDepth,
 	}

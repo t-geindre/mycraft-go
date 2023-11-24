@@ -66,8 +66,8 @@ MeshLoop:
 	for _, meshPos := range wm.getMissingMeshesPos(pos) {
 		requiredChunks := [...]math32.Vector2{
 			chunkCenter: {X: meshPos.X, Y: meshPos.Z},
-			chunkEast:   {X: meshPos.X + world.ChunkWith, Y: meshPos.Z},
-			chunkWest:   {X: meshPos.X - world.ChunkWith, Y: meshPos.Z},
+			chunkEast:   {X: meshPos.X + world.ChunkWidth, Y: meshPos.Z},
+			chunkWest:   {X: meshPos.X - world.ChunkWidth, Y: meshPos.Z},
 			chunkNorth:  {X: meshPos.X, Y: meshPos.Z + world.ChunkDepth},
 			chunkSouth:  {X: meshPos.X, Y: meshPos.Z - world.ChunkDepth},
 		}
@@ -108,7 +108,7 @@ func (wm *WorldMesher) RemoveChunk(chunk *world.Chunk) {
 
 func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 {
 	missing := make([]math32.Vector3, 0, 100)
-	for x := pos.X - wm.renderDistance; x <= pos.X+wm.renderDistance; x += world.ChunkWith {
+	for x := pos.X - wm.renderDistance; x <= pos.X+wm.renderDistance; x += world.ChunkWidth {
 		for z := pos.Z - wm.renderDistance; z <= pos.Z+wm.renderDistance; z += world.ChunkDepth {
 			for y := math32.Max(0, pos.Y-wm.renderDistance); y < math32.Min(pos.Y+wm.renderDistance, world.ChunkHeight); y += ChunkletSize {
 				newPos := math32.Vector3{X: x, Y: y, Z: z}
@@ -125,7 +125,7 @@ func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 
 
 func (wm *WorldMesher) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 	return math32.Vector3{
-		X: math32.Floor(pos.X/world.ChunkWith) * world.ChunkWith,
+		X: math32.Floor(pos.X/world.ChunkWidth) * world.ChunkWidth,
 		Y: math32.Floor(pos.Y/ChunkletSize) * ChunkletSize,
 		Z: math32.Floor(pos.Z/world.ChunkDepth) * world.ChunkDepth,
 	}

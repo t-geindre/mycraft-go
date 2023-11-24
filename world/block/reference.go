@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	BlockGrass = iota
+	BlockNone = iota
+	BlockGrass
 	BlockDirt
 	BlockStone
 	BlockWater
