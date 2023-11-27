@@ -3,6 +3,7 @@ package world
 import (
 	"github.com/g3n/engine/math32"
 	"mycraft/world/block"
+	"sort"
 )
 
 type World struct {
@@ -35,7 +36,11 @@ func NewWorld(rd float32, generator Generator) *World {
 
 func (w *World) Run() {
 	for {
-		pos := <-w.posChan
+		pos, ok := <-w.posChan
+		if !ok {
+			return
+		}
+
 		if pos.Equals(&w.lastPost) && w.initialized {
 			continue
 		}
@@ -76,26 +81,38 @@ func (w *World) RemoveChunkChannel() chan []*Chunk {
 
 func (w *World) addMissingChunks(pos math32.Vector2) {
 	addedChunks := make([]*Chunk, 0)
+	missing := make([]math32.Vector2, 0)
 	for x := pos.X - w.rDist; x <= pos.X+w.rDist; x++ {
 		for y := pos.Y - w.rDist; y <= pos.Y+w.rDist; y++ {
-			chunkPos := math32.Vector2{X: x, Y: y}
-			if _, ok := w.chunks[chunkPos]; !ok {
-				chunkWorldPos := math32.Vector2{
-					X: float32(int(x) * ChunkWidth),
-					Y: float32(int(y) * ChunkDepth),
-				}
-				chunk := NewChunk(chunkWorldPos)
-				w.PopulateChunk(chunk)
-				w.chunks[chunkPos] = chunk
-				addedChunks = append(addedChunks, w.chunks[chunkPos])
-
-				if len(addedChunks)%chunkChanPackSize == 0 {
-					w.addChunkChan <- addedChunks
-					addedChunks = make([]*Chunk, 0)
-				}
+			chunkPos := math32.Vector2{
+				X: float32(int(x)),
+				Y: float32(int(y)),
 			}
-
+			if _, ok := w.chunks[chunkPos]; !ok {
+				missing = append(missing, chunkPos)
+			}
 		}
+	}
+
+	sort.Slice(missing, func(i, j int) bool {
+		return missing[i].DistanceToSquared(&pos) < missing[j].DistanceToSquared(&pos)
+	})
+
+	for _, chunkPos := range missing {
+		chunkWorldPos := math32.Vector2{
+			X: float32(int(chunkPos.X) * ChunkWidth),
+			Y: float32(int(chunkPos.Y) * ChunkDepth),
+		}
+		chunk := NewChunk(chunkWorldPos)
+		w.PopulateChunk(chunk)
+		w.chunks[chunkPos] = chunk
+		addedChunks = append(addedChunks, w.chunks[chunkPos])
+
+		if len(addedChunks)%chunkChanPackSize == 0 {
+			w.addChunkChan <- addedChunks
+			addedChunks = make([]*Chunk, 0)
+		}
+
 	}
 	if len(addedChunks) > 0 {
 		w.addChunkChan <- addedChunks
@@ -136,4 +153,10 @@ func (w *World) PopulateChunk(chunk *Chunk) {
 		}
 	}
 	w.generator.Reset()
+}
+
+func (w *World) Dispose() {
+	close(w.posChan)
+	close(w.addChunkChan)
+	close(w.removeChunkChan)
 }

@@ -10,11 +10,10 @@ import (
 	"mycraft/mesh"
 	"mycraft/world"
 	"mycraft/world/generator"
-	"mycraft/world/generator/noise"
 	"time"
 )
 
-const renderingDistance = 20 // chunks
+const renderingDistance = 30 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -34,7 +33,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	g.app = app
 
 	// Set WASM camera control
-	g.app.Cam.SetPosition(0, 50, 0)
+	g.app.Cam.SetPosition(0, 60, 0)
 	g.camControl = camera.NewWASMControl(g.app.Cam)
 	g.camControl.CaptureMouse(g.app.GlsWindow)
 
@@ -57,14 +56,16 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
 	g.world = world.NewWorld(
 		renderingDistance+1,
-		generator.NewSimpleGenerator(
-			noise.NewOctaveSimplexNoise(1), //noise.NewOctaveSimplexNoise(1),
-			20,
-		),
+		generator.NewBiomeGenerator(0),
 	)
+	//	generator.NewSimpleGenerator(
+	//		noise.NewOctaveSimplexNoise(1), //noise.NewOctaveSimplexNoise(1),
+	//		20,
+	//	),
+	//)
 
 	// Create world mesher
-	g.worldMesher = mesh.NewWorldMesher(renderingDistance * mesh.ChunkletSize)
+	g.worldMesher = mesh.NewWorldMesher(renderingDistance*mesh.ChunkletSize, g.world)
 	g.container.Add(g.worldMesher.Container())
 }
 
@@ -82,24 +83,13 @@ func (g *Game) onKeyDown(_ string, ev interface{}) {
 }
 
 func (g *Game) Update(deltaTime time.Duration) {
-	g.world.UpdateFromVec3(g.app.Cam.Position())
-
-	select {
-	case chunks := <-g.world.AddChunkChannel():
-		for _, chunk := range chunks {
-			g.worldMesher.AddChunk(chunk)
-		}
-	case chunks := <-g.world.RemoveChunkChannel():
-		for _, chunk := range chunks {
-			g.worldMesher.RemoveChunk(chunk)
-		}
-	default:
-	}
-
 	g.camControl.Update(deltaTime)
+	g.world.UpdateFromVec3(g.app.Cam.Position())
 	g.worldMesher.Update(g.app.Cam.Position())
 }
 
 func (g *Game) Dispose() {
 	g.app.Engine.UnsubscribeID(window.OnKeyDown, &g)
+	g.world.Dispose()
+	g.worldMesher.Dispose()
 }

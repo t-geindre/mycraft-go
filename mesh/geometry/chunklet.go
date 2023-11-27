@@ -18,8 +18,12 @@ type Chunklet struct {
 
 func NewChunkletGeometry(chunk, east, west, north, south *world.Chunk, index float32) *Chunklet {
 	c := new(Chunklet)
-	quads := c.computeQuads(chunk, east, west, north, south, index)
 
+	if chunk.AreLayersEmpty(int(index), int(index)+ChunkletSize) {
+		return nil
+	}
+
+	quads := c.computeQuads(chunk, east, west, north, south, index)
 	if len(quads) == 0 {
 		return nil
 	}
@@ -46,7 +50,7 @@ func (c *Chunklet) computeQuads(chunk, east, west, north, south *world.Chunk, in
 				}
 
 				var topBlock *block.Block
-				if y < chunk.Size().Y {
+				if y < chunk.Size().Y-1 {
 					topBlock = chunk.GetBlockAt(iX, iY+1, iZ)
 				}
 				if topBlock == nil || (topBlock.Transparent && topBlock.Id != currentBlock.Id) {

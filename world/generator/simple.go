@@ -14,14 +14,7 @@ type Simple struct {
 func NewSimpleGenerator(baseNoise noise.Noise, waterLevel float32) *Simple {
 	s := new(Simple)
 	s.waterLevel = waterLevel
-
-	// Add noise caching
-	switch baseNoise.(type) {
-	case *noise.Cached:
-		s.noise = baseNoise.(*noise.Cached)
-	default:
-		s.noise = noise.NewCachedNoise(baseNoise, world.ChunkDepth)
-	}
+	s.noise = noise.GetCachedNoise(baseNoise, world.ChunkDepth)
 
 	return s
 }

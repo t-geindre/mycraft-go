@@ -4,18 +4,21 @@ import (
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/math32"
 	"mycraft/world"
+	"sort"
+	"time"
 )
 
 type WorldMesher struct {
-	chunks         map[math32.Vector2]*world.Chunk
-	meshes         map[math32.Vector3]*Chunklet
-	meshesQueue    *ChunkletQueue
-	container      *core.Node
-	renderDistance float32 // chunks horizontal, chunklet vertical
-	lastPos        *math32.Vector3
+	chunks            map[math32.Vector2]*world.Chunk
+	meshes            map[math32.Vector3]*Chunklet
+	world             *world.World
+	renderDistance    float32 // chunks horizontal, chunklet vertical
+	container         *core.Node
+	lastPos           *math32.Vector3
+	positionChannel   chan math32.Vector3
+	addMeshChannel    chan *Chunklet
+	removeMeshChannel chan *Chunklet
 }
-
-const meshQueryPackSize = 20
 
 const (
 	chunkCenter = iota
@@ -25,40 +28,83 @@ const (
 	chunkSouth
 )
 
-func NewWorldMesher(rd float32) *WorldMesher {
-	// todo add a meshing go routine to avoid rendering lag
+func NewWorldMesher(rd float32, w *world.World) *WorldMesher {
 	wm := new(WorldMesher)
+
 	wm.chunks = make(map[math32.Vector2]*world.Chunk)
 	wm.meshes = make(map[math32.Vector3]*Chunklet)
+
+	wm.positionChannel = make(chan math32.Vector3, 1)
+	wm.addMeshChannel = make(chan *Chunklet, 20)
+	wm.removeMeshChannel = make(chan *Chunklet, 20)
+
 	wm.container = core.NewNode()
 	wm.renderDistance = rd
+	wm.world = w
 
-	wm.meshesQueue = NewChunkletQueue(20, 1, func(chunklet *Chunklet) {
-		if chunklet == nil {
-			return
-		}
-		wm.meshes[chunklet.Position()] = chunklet
-		wm.container.Add(chunklet)
-	})
+	go wm.Run()
 
 	return wm
 }
 
-func (wm *WorldMesher) Update(pos math32.Vector3) {
-	wm.meshesQueue.Pull()
-
-	pos = wm.getWorldPosition(pos)
-	if wm.lastPos != nil && pos.Equals(wm.lastPos) {
-		return
+func (wm *WorldMesher) Run() {
+	for {
+		select {
+		case chunks := <-wm.world.AddChunkChannel():
+			for _, chunk := range chunks {
+				wm.AddChunk(chunk)
+			}
+			if wm.lastPos != nil {
+				wm.doUpdate(*wm.lastPos)
+			}
+		case chunks := <-wm.world.RemoveChunkChannel():
+			for _, chunk := range chunks {
+				wm.RemoveChunk(chunk)
+			}
+		case pos, ok := <-wm.positionChannel:
+			if !ok {
+				return
+			}
+			if wm.lastPos != nil && pos.Equals(wm.lastPos) {
+				break
+			}
+			wm.lastPos = &pos
+			wm.doUpdate(pos)
+		default:
+			time.Sleep(1 * time.Millisecond)
+		}
 	}
+}
 
-	wm.lastPos = &pos
-	wm.doUpdate(*wm.lastPos)
+func (wm *WorldMesher) Update(pos math32.Vector3) {
+	pos = wm.getWorldPosition(pos)
+	for len(wm.positionChannel) > 0 {
+		// Still processing previous position
+		// refresh the awaiting one
+		<-wm.positionChannel
+	}
+	wm.positionChannel <- pos
+
+	wm.UpdateMeshes()
+}
+
+func (wm *WorldMesher) UpdateMeshes() {
+	for {
+		select {
+		case mesh := <-wm.addMeshChannel:
+			wm.container.Add(mesh)
+		case mesh := <-wm.removeMeshChannel:
+			mesh.GetGeometry().Dispose()
+			wm.container.Remove(mesh)
+		default:
+			return
+		}
+	}
 }
 
 func (wm *WorldMesher) doUpdate(pos math32.Vector3) {
 	wm.addMissingMeshes(pos)
-	wm.clearToFarMeshes(pos)
+	wm.clearTooFarMeshes(pos)
 }
 
 func (wm *WorldMesher) addMissingMeshes(pos math32.Vector3) {
@@ -78,19 +124,19 @@ MeshLoop:
 			}
 		}
 
-		// avoid further generation query
-		wm.meshes[meshPos] = nil
+		wm.meshes[meshPos] = NewChunklet(
+			wm.chunks[requiredChunks[chunkCenter]],
+			wm.chunks[requiredChunks[chunkEast]],
+			wm.chunks[requiredChunks[chunkWest]],
+			wm.chunks[requiredChunks[chunkNorth]],
+			wm.chunks[requiredChunks[chunkSouth]],
+			meshPos,
+		)
 
-		wm.meshesQueue.Push(ChunkletQuery{
-			Pos:    meshPos,
-			Center: wm.chunks[requiredChunks[chunkCenter]],
-			East:   wm.chunks[requiredChunks[chunkEast]],
-			West:   wm.chunks[requiredChunks[chunkWest]],
-			North:  wm.chunks[requiredChunks[chunkNorth]],
-			South:  wm.chunks[requiredChunks[chunkSouth]],
-		})
+		if wm.meshes[meshPos] != nil {
+			wm.addMeshChannel <- wm.meshes[meshPos]
+		}
 	}
-
 }
 
 func (wm *WorldMesher) Container() *core.Node {
@@ -99,7 +145,6 @@ func (wm *WorldMesher) Container() *core.Node {
 
 func (wm *WorldMesher) AddChunk(chunk *world.Chunk) {
 	wm.chunks[*chunk.Position()] = chunk
-	wm.doUpdate(*wm.lastPos)
 }
 
 func (wm *WorldMesher) RemoveChunk(chunk *world.Chunk) {
@@ -112,6 +157,9 @@ func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 
 		for z := pos.Z - wm.renderDistance; z <= pos.Z+wm.renderDistance; z += world.ChunkDepth {
 			for y := math32.Max(0, pos.Y-wm.renderDistance); y < math32.Min(pos.Y+wm.renderDistance, world.ChunkHeight); y += ChunkletSize {
 				newPos := math32.Vector3{X: x, Y: y, Z: z}
+				if newPos.DistanceToSquared(&pos) > wm.renderDistance*wm.renderDistance {
+					continue
+				}
 				if _, ok := wm.meshes[newPos]; ok {
 					continue
 				}
@@ -119,6 +167,10 @@ func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 
 			}
 		}
 	}
+
+	sort.Slice(missing, func(i, j int) bool {
+		return missing[i].DistanceTo(&pos) < missing[j].DistanceTo(&pos)
+	})
 
 	return missing
 }
@@ -131,22 +183,28 @@ func (wm *WorldMesher) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 	}
 }
 
-func (wm *WorldMesher) clearToFarMeshes(pos math32.Vector3) {
-	meshCap := math32.Pow(wm.renderDistance/ChunkletSize, 3)
-	if len(wm.container.Children()) < int(meshCap) {
-		return
-	}
-
+func (wm *WorldMesher) clearTooFarMeshes(pos math32.Vector3) {
 	for meshPos, mesh := range wm.meshes {
 		// todo clear farest first until meshcap is reached
 		if math32.Abs(meshPos.X-pos.X) > wm.renderDistance ||
 			math32.Abs(meshPos.Y-pos.Y) > wm.renderDistance ||
 			math32.Abs(meshPos.Z-pos.Z) > wm.renderDistance {
 			if mesh != nil {
-				wm.container.Remove(mesh)
-				mesh.GetGeometry().Dispose()
+				wm.removeMeshChannel <- mesh
 			}
 			delete(wm.meshes, meshPos)
+		}
+	}
+}
+
+func (wm *WorldMesher) Dispose() {
+	close(wm.positionChannel)
+	close(wm.addMeshChannel)
+	close(wm.removeMeshChannel)
+
+	for _, mesh := range wm.meshes {
+		if mesh != nil {
+			mesh.GetGeometry().Dispose()
 		}
 	}
 }

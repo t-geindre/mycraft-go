@@ -1,24 +1,43 @@
 package generator
 
-import "github.com/ojrac/opensimplex-go"
+import (
+	"mycraft/world"
+	"mycraft/world/block"
+	"mycraft/world/generator/biome"
+	"mycraft/world/generator/noise"
+	"mycraft/world/generator/noise/normalized"
+)
 
 type BiomeGenerator struct {
-	seed       int64
-	biomeNoise opensimplex.Noise32
+	mountainNoise noise.Noise
+	noise         *noise.Cached
+	biomes        []biome.Biome
 }
 
 func NewBiomeGenerator(seed int64) *BiomeGenerator {
-	b := new(BiomeGenerator)
-	b.seed = seed
-	b.biomeNoise = opensimplex.NewNormalized32(seed)
-	// biome strength calculated accordig to the more centeral value in given ranges (0-1)
-	return b
+	bg := new(BiomeGenerator)
+	bg.noise = noise.GetCachedNoise(normalized.NewSimplexNoise(seed), world.ChunkDepth)
+	bg.mountainNoise = noise.GetCachedNoise(noise.NewMountainNoise(seed), world.ChunkDepth)
+
+	return bg
 }
 
-func (b BiomeGenerator) GetBlockAt(x, y, z float32) uint16 {
-	panic("implement me")
+func (bg BiomeGenerator) GetBlockAt(x, y, z float32) uint16 {
+	ground := float32(50)
+	ground += bg.noise.Eval2(x/100, z/100)*4 - 2
+
+	ground += bg.mountainNoise.Eval2(x, z)
+
+	if y < ground {
+		if ground > 80 {
+			return block.BlockStone
+		}
+		return block.BlockGrass
+	}
+
+	return block.BlockNone
 }
 
-func (b BiomeGenerator) Reset() {
-	panic("implement me")
+func (bg BiomeGenerator) Reset() {
+	bg.noise.Clear()
 }

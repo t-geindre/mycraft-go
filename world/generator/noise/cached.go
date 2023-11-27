@@ -17,6 +17,15 @@ func NewCachedNoise(noise Noise, capacity int) *Cached {
 	return e
 }
 
+func GetCachedNoise(subNoise Noise, capacity int) *Cached {
+	switch subNoise.(type) {
+	case *Cached:
+		return subNoise.(*Cached)
+	default:
+		return NewCachedNoise(subNoise, capacity)
+	}
+}
+
 func (e *Cached) Eval2(x, z float32) float32 {
 	if e.cache[x][z] == nil {
 		if e.cache[x] == nil {
