@@ -24,15 +24,27 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 
 func (bg BiomeGenerator) GetBlockAt(x, y, z float32) uint16 {
 	ground := float32(50)
-	ground += bg.noise.Eval2(x/100, z/100)*4 - 2
 
 	ground += bg.mountainNoise.Eval2(x, z)
+	//ground += math32.Floor(bg.noise.Eval2(x/100, z/100) * 4)
 
-	if y < ground {
-		if ground > 80 {
-			return block.BlockStone
+	if y == ground {
+		if y > 90 {
+			return block.BlockGrassSnow
 		}
 		return block.BlockGrass
+	}
+
+	if y < ground-2 {
+		return block.BlockStone
+	}
+
+	if y < ground {
+		return block.BlockDirt
+	}
+
+	if y > ground && y < 50 {
+		return block.BlockWater
 	}
 
 	return block.BlockNone

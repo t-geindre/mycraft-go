@@ -58,3 +58,8 @@ func (c *Chunk) AreLayersEmpty(from, to int) bool {
 
 	return true
 }
+
+func (c *Chunk) IsLayerEmpty(l int) bool {
+	_, ok := c.filledLayers[l]
+	return !ok
+}

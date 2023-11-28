@@ -41,6 +41,9 @@ func (c *Chunklet) computeQuads(chunk, east, west, north, south *world.Chunk, in
 
 	for x := float32(0); x < chunk.Size().X; x++ {
 		for y := index; y < index+ChunkletSize; y++ {
+			if chunk.IsLayerEmpty(int(y)) {
+				continue
+			}
 			for z := float32(0); z < chunk.Size().Z; z++ {
 				iX, iY, iZ := int(x), int(y), int(z)
 				currentBlock := chunk.GetBlockAt(iX, iY, iZ)

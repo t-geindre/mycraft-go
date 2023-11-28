@@ -43,11 +43,13 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 
 	// Create and add lights
 	// todo check how we can maybe set how materials react to light SetUseLights()
-	g.container.Add(light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, .5))
-	dl := light.NewDirectional(&math32.Color{R: 1, G: 1, B: 1}, .8)
-	dl.SetDirectionVec(&math32.Vector3{X: 0, Y: -1, Z: 0})
-	dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
-	g.container.Add(dl)
+	g.container.Add(light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, 1.3))
+	/*
+		dl := light.NewDirectional(&math32.Color{R: 1, G: 1, B: 1}, .8)
+		dl.SetDirectionVec(&math32.Vector3{X: 0, Y: -1, Z: 0})
+		dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
+		g.container.Add(dl)
+	*/
 
 	// Add skybox
 	g.container.Add(mesh.NewSkybox())

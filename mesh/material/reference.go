@@ -1,13 +1,16 @@
 package material
 
 import (
+	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
+	"github.com/g3n/engine/texture"
 )
 
 const (
 	BlockGrassTop = iota
 	BlockGrassSide
+	BlockGrassSideSnow
 	BlockDirt
 	BlockStone
 	BlockWater
@@ -59,6 +62,17 @@ func materialReference() map[uint16]materialDef {
 
 	ref[BlockGrassSide] = materialDef{
 		TextureFile: "assets/block/grass_block_side.png",
+	}
+
+	ref[BlockGrassSideSnow] = materialDef{
+		TextureFile: "assets/block/dirt.png",
+		Setup: func(m *material.Standard) {
+			t, _ := texture.NewTexture2DFromImage("assets/block/grass_block_side_overlay.png")
+			t.SetMagFilter(gls.NEAREST)
+			t.SetWrapT(gls.REPEAT)
+			t.SetWrapS(gls.REPEAT)
+			m.AddTexture(t)
+		},
 	}
 
 	ref[BlockDirt] = materialDef{

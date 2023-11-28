@@ -26,11 +26,12 @@ func NewWorld(rd float32, generator Generator) *World {
 	w.rDist = rd
 	w.generator = generator
 	w.posChan = make(chan math32.Vector2, 1)
-	w.addChunkChan = make(chan []*Chunk, chunkChanPackSize)
-	w.removeChunkChan = make(chan []*Chunk, chunkChanPackSize)
+	w.addChunkChan = make(chan []*Chunk, 1)
+	w.removeChunkChan = make(chan []*Chunk, 1)
 	w.blocks = block.GetRepository()
-	// todo make sure the go routine is stopped when the world is destroyed
+
 	go w.Run()
+
 	return w
 }
 

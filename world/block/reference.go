@@ -9,6 +9,7 @@ const (
 	BlockNone = iota
 	BlockSand
 	BlockGrass
+	BlockGrassSnow
 	BlockDirt
 	BlockStone
 	BlockWater
@@ -57,6 +58,17 @@ func blockReference() map[uint16]*Block {
 			South:  matRepo.Get(matRef.BlockGrassSide),
 			East:   matRepo.Get(matRef.BlockGrassSide),
 			West:   matRepo.Get(matRef.BlockGrassSide),
+		},
+	}
+
+	ref[BlockGrassSnow] = &Block{
+		Materials: BlockMaterials{
+			Top:    matRepo.Get(matRef.Snow),
+			Bottom: matRepo.Get(matRef.BlockDirt),
+			North:  matRepo.Get(matRef.BlockGrassSideSnow),
+			South:  matRepo.Get(matRef.BlockGrassSideSnow),
+			East:   matRepo.Get(matRef.BlockGrassSideSnow),
+			West:   matRepo.Get(matRef.BlockGrassSideSnow),
 		},
 	}
 
