@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const renderingDistance = 30 // chunks
+const renderingDistance = 40 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -43,28 +43,18 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 
 	// Create and add lights
 	// todo check how we can maybe set how materials react to light SetUseLights()
-	g.container.Add(light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, 1.3))
-	/*
-		dl := light.NewDirectional(&math32.Color{R: 1, G: 1, B: 1}, .8)
-		dl.SetDirectionVec(&math32.Vector3{X: 0, Y: -1, Z: 0})
-		dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
-		g.container.Add(dl)
-	*/
+	g.container.Add(light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, .8))
+	dl := light.NewDirectional(&math32.Color{R: 1, G: 1, B: 1}, .8)
+	dl.SetDirectionVec(&math32.Vector3{X: 0, Y: -1, Z: 0})
+	dl.SetPositionVec(&math32.Vector3{X: 0, Y: 300, Z: 0})
+	g.container.Add(dl)
 
 	// Add skybox
 	g.container.Add(mesh.NewSkybox())
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
-	g.world = world.NewWorld(
-		renderingDistance+1,
-		generator.NewBiomeGenerator(0),
-	)
-	//	generator.NewSimpleGenerator(
-	//		noise.NewOctaveSimplexNoise(1), //noise.NewOctaveSimplexNoise(1),
-	//		20,
-	//	),
-	//)
+	g.world = world.NewWorld(renderingDistance+1, generator.NewBiomeGenerator(0))
 
 	// Create world mesher
 	g.worldMesher = mesh.NewWorldMesher(renderingDistance*mesh.ChunkletSize, g.world)

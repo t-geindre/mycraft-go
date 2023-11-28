@@ -1,20 +1,19 @@
 package generator
 
 import (
-	"mycraft/world"
 	"mycraft/world/block"
 	"mycraft/world/generator/noise"
 )
 
 type Simple struct {
-	noise      *noise.Cached
+	noise      noise.Noise
 	waterLevel float32
 }
 
 func NewSimpleGenerator(baseNoise noise.Noise, waterLevel float32) *Simple {
 	s := new(Simple)
 	s.waterLevel = waterLevel
-	s.noise = noise.GetCachedNoise(baseNoise, world.ChunkDepth)
+	s.noise = baseNoise
 
 	return s
 }
@@ -34,8 +33,4 @@ func (s *Simple) GetBlockAt(x, y, z float32) uint16 {
 	}
 
 	return block.BlockNone
-}
-
-func (s *Simple) Reset() {
-	s.noise.Clear()
 }

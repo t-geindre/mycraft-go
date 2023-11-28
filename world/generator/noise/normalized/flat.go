@@ -1,10 +1,14 @@
-package noise
+package normalized
 
 type Flat struct {
 	val float32
 }
 
 func NewFlatNoise(val float32) *Flat {
+	if val > 1 || val < 0 {
+		panic("Flat noise value must be between 0 and 1 (normalized)")
+	}
+
 	flat := new(Flat)
 	flat.val = val
 
@@ -12,13 +16,5 @@ func NewFlatNoise(val float32) *Flat {
 }
 
 func (f Flat) Eval2(x, y float32) float32 {
-	return f.val
-}
-
-func (f Flat) Eval3(x, y, z float32) float32 {
-	return f.val
-}
-
-func (f Flat) Eval4(x, y, z, w float32) float32 {
 	return f.val
 }

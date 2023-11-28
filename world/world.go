@@ -105,7 +105,7 @@ func (w *World) addMissingChunks(pos math32.Vector2) {
 			Y: float32(int(chunkPos.Y) * ChunkDepth),
 		}
 		chunk := NewChunk(chunkWorldPos)
-		w.PopulateChunk(chunk)
+		w.generator.Populate(chunk)
 		w.chunks[chunkPos] = chunk
 		addedChunks = append(addedChunks, w.chunks[chunkPos])
 
@@ -137,23 +137,6 @@ func (w *World) clearTooFarChunks(pos math32.Vector2) {
 		w.removeChunkChan <- removedChunks
 		removedChunks = make([]*Chunk, 10)
 	}
-}
-
-func (w *World) PopulateChunk(chunk *Chunk) {
-	for x := 0; x < ChunkWidth; x++ {
-		cX := float32(x) + chunk.Position().X
-		for z := 0; z < ChunkDepth; z++ {
-			cZ := float32(z) + chunk.Position().Y
-			for y := 0; y < ChunkHeight; y++ {
-				cY := float32(y)
-				bid := w.generator.GetBlockAt(cX, cY, cZ)
-				if bid != block.BlockNone {
-					chunk.SetBlockAt(x, y, z, w.blocks.Get(bid))
-				}
-			}
-		}
-	}
-	w.generator.Reset()
 }
 
 func (w *World) Dispose() {

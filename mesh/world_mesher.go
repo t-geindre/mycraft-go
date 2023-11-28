@@ -16,8 +16,8 @@ type WorldMesher struct {
 	container         *core.Node
 	lastPos           *math32.Vector3
 	positionChannel   chan math32.Vector3
-	addMeshChannel    chan *Chunklet
-	removeMeshChannel chan *Chunklet
+	addMeshChannel    chan []*Chunklet
+	removeMeshChannel chan []*Chunklet
 }
 
 const (
@@ -35,8 +35,8 @@ func NewWorldMesher(rd float32, w *world.World) *WorldMesher {
 	wm.meshes = make(map[math32.Vector3]*Chunklet)
 
 	wm.positionChannel = make(chan math32.Vector3, 1)
-	wm.addMeshChannel = make(chan *Chunklet, 20)
-	wm.removeMeshChannel = make(chan *Chunklet, 20)
+	wm.addMeshChannel = make(chan []*Chunklet, 20)
+	wm.removeMeshChannel = make(chan []*Chunklet, 20)
 
 	wm.container = core.NewNode()
 	wm.renderDistance = rd
@@ -91,11 +91,15 @@ func (wm *WorldMesher) Update(pos math32.Vector3) {
 func (wm *WorldMesher) UpdateMeshes() {
 	for {
 		select {
-		case mesh := <-wm.addMeshChannel:
-			wm.container.Add(mesh)
-		case mesh := <-wm.removeMeshChannel:
-			mesh.GetGeometry().Dispose()
-			wm.container.Remove(mesh)
+		case meshes := <-wm.addMeshChannel:
+			for _, mesh := range meshes {
+				wm.container.Add(mesh)
+			}
+		case meshes := <-wm.removeMeshChannel:
+			for _, mesh := range meshes {
+				mesh.GetGeometry().Dispose()
+				wm.container.Remove(mesh)
+			}
 		default:
 			return
 		}
@@ -108,6 +112,7 @@ func (wm *WorldMesher) doUpdate(pos math32.Vector3) {
 }
 
 func (wm *WorldMesher) addMissingMeshes(pos math32.Vector3) {
+	toAdd := make([]*Chunklet, 0, 100)
 MeshLoop:
 	for _, meshPos := range wm.getMissingMeshesPos(pos) {
 		requiredChunks := [...]math32.Vector2{
@@ -134,8 +139,12 @@ MeshLoop:
 		)
 
 		if wm.meshes[meshPos] != nil {
-			wm.addMeshChannel <- wm.meshes[meshPos]
+			toAdd = append(toAdd, wm.meshes[meshPos])
 		}
+	}
+
+	if len(toAdd) > 0 {
+		wm.addMeshChannel <- toAdd
 	}
 }
 
@@ -184,17 +193,19 @@ func (wm *WorldMesher) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 }
 
 func (wm *WorldMesher) clearTooFarMeshes(pos math32.Vector3) {
+	toRemove := make([]*Chunklet, 0, 100)
 	for meshPos, mesh := range wm.meshes {
 		// todo clear farest first until meshcap is reached
 		if math32.Abs(meshPos.X-pos.X) > wm.renderDistance ||
 			math32.Abs(meshPos.Y-pos.Y) > wm.renderDistance ||
 			math32.Abs(meshPos.Z-pos.Z) > wm.renderDistance {
 			if mesh != nil {
-				wm.removeMeshChannel <- mesh
+				toRemove = append(toRemove, mesh)
 			}
 			delete(wm.meshes, meshPos)
 		}
 	}
+	wm.removeMeshChannel <- toRemove
 }
 
 func (wm *WorldMesher) Dispose() {

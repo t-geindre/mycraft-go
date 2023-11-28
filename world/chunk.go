@@ -2,7 +2,6 @@ package world
 
 import (
 	"github.com/g3n/engine/math32"
-	"mycraft/world/block"
 )
 
 const ChunkWidth = 16
@@ -10,7 +9,7 @@ const ChunkDepth = 16
 const ChunkHeight = 256
 
 type Chunk struct {
-	blocks       [ChunkWidth][ChunkHeight][ChunkDepth]*block.Block
+	blocks       [ChunkWidth][ChunkHeight][ChunkDepth]uint16
 	position     *math32.Vector2
 	size         *math32.Vector3
 	isEmpty      bool
@@ -34,14 +33,12 @@ func (c *Chunk) Position() *math32.Vector2 {
 	return c.position
 }
 
-func (c *Chunk) SetBlockAt(x, y, z int, b *block.Block) {
+func (c *Chunk) SetBlockAt(x, y, z int, b uint16) {
+	c.filledLayers[y] = true
 	c.blocks[x][y][z] = b
-	if b != nil {
-		c.filledLayers[y] = true
-	}
 }
 
-func (c *Chunk) GetBlockAt(x, y, z int) *block.Block {
+func (c *Chunk) GetBlockAt(x, y, z int) uint16 {
 	return c.blocks[x][y][z]
 }
 
