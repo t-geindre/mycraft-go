@@ -17,7 +17,7 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg := new(BiomeGenerator)
 
 	bg.noise = normalized.NewSimplexNoise(seed)
-	bg.noise = noise.NewScale(bg.noise, 200)
+	bg.noise = noise.NewScale(bg.noise, 600)
 	bg.noise = noise.NewOctave(bg.noise, 2, 0.5, 4)
 	bg.noise = noise.NewAmplify(bg.noise, 50)
 
