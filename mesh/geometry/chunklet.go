@@ -10,136 +10,108 @@ import (
 )
 
 const ChunkletSize = 16
+const BlockSize = 1
 
 type Chunklet struct {
 	*geometry.Geometry
 	materialMap map[material.IMaterial]int
 	repository  *block.Repository
+	chunk       *world.Chunk
+	chunkEast   *world.Chunk
+	chunkWest   *world.Chunk
+	chunkNorth  *world.Chunk
+	chunkSouth  *world.Chunk
+	yIndex      float32
+	quads       []*Quad
 }
 
-func NewChunkletGeometry(chunk, east, west, north, south *world.Chunk, index float32) *Chunklet {
+func NewChunkletGeometry(chunk, east, west, north, south *world.Chunk, index float32) (*geometry.Geometry, map[material.IMaterial]int) {
+	if chunk.AreLayersEmpty(int(index), int(index)+ChunkletSize) {
+		return nil, nil
+	}
+
 	c := new(Chunklet)
 	c.repository = block.GetRepository()
+	c.chunk = chunk
+	c.chunkEast = east
+	c.chunkWest = west
+	c.chunkNorth = north
+	c.chunkSouth = south
+	c.yIndex = index
+	c.quads = make([]*Quad, 0)
 
-	if chunk.AreLayersEmpty(int(index), int(index)+ChunkletSize) {
-		return nil
+	c.computeQuads()
+
+	if len(c.quads) == 0 {
+		return nil, nil
 	}
 
-	quads := c.computeQuads(chunk, east, west, north, south, index)
-	if len(quads) == 0 {
-		return nil
-	}
+	c.computeGeometry()
 
-	c.computeGeometry(quads)
-
-	return c
+	return c.Geometry, c.materialMap
 }
 
-func (c *Chunklet) computeQuads(chunk, east, west, north, south *world.Chunk, index float32) []*Quad {
-	quads := make([]*Quad, 0, 16*16*16)
-
-	// Todo there must be a way to factorize this code
+func (c *Chunklet) computeQuads() {
 	// Todo translate x,y to center chunklet
-	for x := float32(0); x < chunk.Size().X; x++ {
-		for y := index; y < index+ChunkletSize; y++ {
-			if chunk.IsLayerEmpty(int(y)) {
-				continue
-			}
-			for z := float32(0); z < chunk.Size().Z; z++ {
+	for y := c.yIndex; y < c.yIndex+ChunkletSize; y++ {
+		if c.chunk.IsLayerEmpty(int(y)) {
+			continue
+		}
+		for x := float32(0); x < c.chunk.Size().X; x++ {
+			for z := float32(0); z < c.chunk.Size().Z; z++ {
 				iX, iY, iZ := int(x), int(y), int(z)
-				currentBlock := c.getBlockAt(chunk, iX, iY, iZ)
+				b := c.getBlock(iX, iY, iZ)
 
-				if currentBlock == nil {
+				if b == nil {
 					continue
 				}
 
-				var topBlock *block.Block
-				if y < chunk.Size().Y-1 {
-					topBlock = c.getBlockAt(chunk, iX, iY+1, iZ)
-				}
-				if topBlock == nil || (topBlock.Transparent && topBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x, Y: y + 1 - index, Z: z},
-						QuadFaceUp,
-						currentBlock.Materials.Top,
-					))
+				faces := map[uint8]*block.Block{
+					QuadFaceUp:    c.getBlock(iX, iY+1, iZ),
+					QuadFaceDown:  c.getBlock(iX, iY-1, iZ),
+					QuadFaceSouth: c.getBlock(iX, iY, iZ-1),
+					QuadFaceNorth: c.getBlock(iX, iY, iZ+1),
+					QuadFaceEast:  c.getBlock(iX-1, iY, iZ),
+					QuadFaceWest:  c.getBlock(iX+1, iY, iZ),
 				}
 
-				var bottomBlock *block.Block
-				if y > 0 {
-					bottomBlock = c.getBlockAt(chunk, iX, iY-1, iZ)
-				}
-				if bottomBlock == nil || (bottomBlock.Transparent && bottomBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x, Y: y - index, Z: z},
-						QuadFaceDown,
-						currentBlock.Materials.Bottom,
-					))
-				}
+				for face, adjB := range faces {
+					if adjB == nil || (adjB.IsTransparent() && !adjB.IsSame(b)) {
+						var pos math32.Vector3
+						var mat material.IMaterial
 
-				var southBlock *block.Block = nil
-				if z == 0 {
-					southBlock = c.getBlockAt(south, iX, iY, int(south.Size().Z)-1)
-				} else {
-					southBlock = c.getBlockAt(chunk, iX, iY, iZ-1)
-				}
-				if southBlock == nil || (southBlock.Transparent && southBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x, Y: y - index, Z: z},
-						QuadFaceSouth,
-						currentBlock.Materials.South,
-					))
-				}
+						switch face {
+						case QuadFaceUp:
+							pos = math32.Vector3{X: x, Y: y + BlockSize - c.yIndex, Z: z}
+							mat = b.GetMaterial(block.MaterialTop)
+						case QuadFaceDown:
+							pos = math32.Vector3{X: x, Y: y - c.yIndex, Z: z}
+							mat = b.GetMaterial(block.MaterialBottom)
+						case QuadFaceSouth:
+							pos = math32.Vector3{X: x, Y: y - c.yIndex, Z: z}
+							mat = b.GetMaterial(block.MaterialSouth)
+						case QuadFaceNorth:
+							pos = math32.Vector3{X: x, Y: y - c.yIndex, Z: z + BlockSize}
+							mat = b.GetMaterial(block.MaterialNorth)
+						case QuadFaceEast:
+							pos = math32.Vector3{X: x, Y: y - c.yIndex, Z: z}
+							mat = b.GetMaterial(block.MaterialEast)
+						case QuadFaceWest:
+							pos = math32.Vector3{X: x + BlockSize, Y: y - c.yIndex, Z: z}
+							mat = b.GetMaterial(block.MaterialWest)
+						default:
+							panic("unknown quad face")
+						}
 
-				var northBlock *block.Block = nil
-				if z == chunk.Size().Z-1 {
-					northBlock = c.getBlockAt(north, iX, iY, 0)
-				} else {
-					northBlock = c.getBlockAt(chunk, iX, iY, iZ+1)
-				}
-				if northBlock == nil || (northBlock.Transparent && northBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x, Y: y - index, Z: z + 1},
-						QuadFaceNorth,
-						currentBlock.Materials.North,
-					))
-				}
-
-				var westBlock *block.Block = nil
-				if x == 0 {
-					westBlock = c.getBlockAt(west, int(west.Size().X)-1, iY, iZ)
-				} else {
-					westBlock = c.getBlockAt(chunk, iX-1, iY, iZ)
-				}
-				if westBlock == nil || (westBlock.Transparent && westBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x, Y: y - index, Z: z},
-						QuadFaceEast,
-						currentBlock.Materials.East,
-					))
-				}
-
-				var eastBlock *block.Block = nil
-				if x == chunk.Size().X-1 {
-					eastBlock = c.getBlockAt(east, 0, iY, iZ)
-				} else {
-					eastBlock = c.getBlockAt(chunk, iX+1, iY, iZ)
-				}
-				if eastBlock == nil || (eastBlock.Transparent && eastBlock.Id != currentBlock.Id) {
-					quads = append(quads, NewQuad(
-						math32.Vector3{X: x + 1, Y: y - index, Z: z},
-						QuadFaceWest,
-						currentBlock.Materials.West,
-					))
+						c.quads = append(c.quads, NewQuad(pos, face, mat))
+					}
 				}
 			}
 		}
 	}
-
-	return quads
 }
 
-func (c *Chunklet) computeGeometry(quads []*Quad) {
+func (c *Chunklet) computeGeometry() {
 	c.Geometry = geometry.NewGeometry()
 
 	positions := math32.NewArrayF32(0, 16)
@@ -148,7 +120,7 @@ func (c *Chunklet) computeGeometry(quads []*Quad) {
 	indices := math32.NewArrayU32(0, 16)
 
 	quadsByMaterial := make(map[material.IMaterial][]*Quad)
-	for _, quad := range quads {
+	for _, quad := range c.quads {
 		if _, ok := quadsByMaterial[quad.Material()]; !ok {
 			quadsByMaterial[quad.Material()] = make([]*Quad, 0)
 		}
@@ -181,16 +153,30 @@ func (c *Chunklet) computeGeometry(quads []*Quad) {
 	c.Geometry.AddVBO(gls.NewVBO(uvs).AddAttrib(gls.VertexTexcoord))
 }
 
-func (c *Chunklet) getBlockAt(chunk *world.Chunk, x, y, z int) *block.Block {
-	b := chunk.GetBlockAt(x, y, z)
-
-	if b == block.BlockNone {
+func (c *Chunklet) getBlock(x, y, z int) *block.Block {
+	if y < 0 || y >= int(c.chunk.Size().Y) {
 		return nil
 	}
+	if x < 0 {
+		return c.getBlockAt(c.chunkWest, int(c.chunkWest.Size().X)+x, y, z)
+	}
+	if x >= int(c.chunk.Size().X) {
+		return c.getBlockAt(c.chunkEast, x-int(c.chunk.Size().X), y, z)
+	}
+	if z < 0 {
+		return c.getBlockAt(c.chunkSouth, x, y, int(c.chunkSouth.Size().Z)+z)
+	}
+	if z >= int(c.chunk.Size().Z) {
+		return c.getBlockAt(c.chunkNorth, x, y, z-int(c.chunk.Size().Z))
+	}
 
-	return c.repository.Get(b)
+	return c.getBlockAt(c.chunk, x, y, z)
 }
 
-func (c *Chunklet) MaterialMap() map[material.IMaterial]int {
-	return c.materialMap
+func (c *Chunklet) getBlockAt(chunk *world.Chunk, x, y, z int) *block.Block {
+	b := chunk.GetBlockAt(x, y, z)
+	if b == block.TypeNone {
+		return nil
+	}
+	return c.repository.Get(b)
 }

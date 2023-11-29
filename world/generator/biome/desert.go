@@ -15,9 +15,9 @@ func NewDesert() *Desert {
 
 func (d *Desert) GetBlockAt(x, y, z, strength float32) uint16 {
 	if y < 10 {
-		return block.BlockSand
+		return block.TypeSand
 	}
-	return block.BlockNone
+	return block.TypeNone
 }
 
 func (d *Desert) Reset() {

@@ -14,7 +14,7 @@ type Chunklet struct {
 }
 
 func NewChunklet(chunk, east, west, north, south *world.Chunk, pos math32.Vector3) *Chunklet {
-	geo := geometry.NewChunkletGeometry(chunk, east, west, north, south, pos.Y)
+	geo, matMap := geometry.NewChunkletGeometry(chunk, east, west, north, south, pos.Y)
 	if geo == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func NewChunklet(chunk, east, west, north, south *world.Chunk, pos math32.Vector
 	c.Mesh = graphic.NewMesh(geo, nil)
 	c.Mesh.SetPositionVec(&pos)
 
-	for mat, groupId := range geo.MaterialMap() {
+	for mat, groupId := range matMap {
 		c.Mesh.AddGroupMaterial(mat, groupId)
 	}
 

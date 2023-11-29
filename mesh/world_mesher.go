@@ -196,9 +196,7 @@ func (wm *WorldMesher) clearTooFarMeshes(pos math32.Vector3) {
 	toRemove := make([]*Chunklet, 0, 100)
 	for meshPos, mesh := range wm.meshes {
 		// todo clear farest first until meshcap is reached
-		if math32.Abs(meshPos.X-pos.X) > wm.renderDistance ||
-			math32.Abs(meshPos.Y-pos.Y) > wm.renderDistance ||
-			math32.Abs(meshPos.Z-pos.Z) > wm.renderDistance {
+		if meshPos.DistanceToSquared(&pos) > wm.renderDistance*wm.renderDistance {
 			if mesh != nil {
 				toRemove = append(toRemove, mesh)
 			}

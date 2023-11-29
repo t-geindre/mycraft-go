@@ -21,16 +21,16 @@ func NewSimpleGenerator(baseNoise noise.Noise, waterLevel float32) *Simple {
 func (s *Simple) GetBlockAt(x, y, z float32) uint16 {
 	groundLevel := s.noise.Eval2(x, z)
 	if y == groundLevel {
-		return block.BlockGrass
+		return block.TypeGrass
 	}
 
 	if y < groundLevel {
-		return block.BlockDirt
+		return block.TypeDirt
 	}
 
 	if y > groundLevel && y < s.waterLevel {
-		return block.BlockWater
+		return block.TypeWater
 	}
 
-	return block.BlockNone
+	return block.TypeNone
 }

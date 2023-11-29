@@ -19,9 +19,9 @@ func (r *Repository) Get(id uint16) *Block {
 
 func newRepository() *Repository {
 	r := new(Repository)
-	r.blocks = blockReference()
+	r.blocks = getReference()
 	for id, block := range r.blocks {
-		block.Id = id
+		block.id = id
 	}
 	return r
 }

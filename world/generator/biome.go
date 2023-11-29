@@ -17,8 +17,8 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg := new(BiomeGenerator)
 
 	bg.noise = normalized.NewSimplexNoise(seed)
-	bg.noise = noise.NewScale(bg.noise, 600)
-	bg.noise = noise.NewOctave(bg.noise, 2, 0.5, 4)
+	bg.noise = noise.NewScale(bg.noise, 500)
+	bg.noise = noise.NewOctave(bg.noise, 2, 0.6, 5)
 	bg.noise = noise.NewAmplify(bg.noise, 50)
 
 	bg.waterLevel = 25
@@ -47,24 +47,24 @@ func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
 func (bg BiomeGenerator) getBlock(ground, x, y, z float32) uint16 {
 	if y == ground {
 		if y <= bg.waterLevel {
-			return block.BlockSand
+			return block.TypeSand
 		}
-		return block.BlockGrass
+		return block.TypeGrass
 	}
 	if y < ground-2 {
-		return block.BlockStone
+		return block.TypeStone
 	}
 
 	if y < ground {
 		if y <= bg.waterLevel {
-			return block.BlockSand
+			return block.TypeSand
 		}
-		return block.BlockDirt
+		return block.TypeDirt
 	}
 
 	if y > ground && y < bg.waterLevel {
-		return block.BlockWater
+		return block.TypeWater
 	}
 
-	return block.BlockNone
+	return block.TypeNone
 }
