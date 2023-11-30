@@ -33,6 +33,10 @@ func (c *Chunk) Position() *math32.Vector2 {
 	return c.position
 }
 
+func (c *Chunk) SetBlockAtF(x, y, z float32, b uint16) {
+	c.SetBlockAt(int(x), int(y), int(z), b)
+}
+
 func (c *Chunk) SetBlockAt(x, y, z int, b uint16) {
 	c.filledLayers[y] = true
 	c.blocks[x][y][z] = b

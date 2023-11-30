@@ -4,24 +4,29 @@ import (
 	"github.com/g3n/engine/math32"
 	"mycraft/world"
 	"mycraft/world/block"
+	"mycraft/world/generator/biome"
 	"mycraft/world/generator/noise"
 	"mycraft/world/generator/noise/normalized"
 )
 
 type BiomeGenerator struct {
-	noise      noise.Noise
-	waterLevel float32
+	noise  noise.Noise
+	biomes []biome.Biome
 }
 
 func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg := new(BiomeGenerator)
 
 	bg.noise = normalized.NewSimplexNoise(seed)
-	bg.noise = noise.NewScale(bg.noise, 500)
-	bg.noise = noise.NewOctave(bg.noise, 2, 0.6, 5)
-	bg.noise = noise.NewAmplify(bg.noise, 50)
+	bg.noise = noise.NewOctave(bg.noise, 2, 0.7, 5)
+	bg.noise = noise.NewScale(bg.noise, 600)
+	bg.noise = noise.NewAmplify(bg.noise, 60)
 
-	bg.waterLevel = 25
+	bg.biomes = []biome.Biome{
+		biome.NewWater(1, 25),
+		biome.NewBeach(26, 26),
+		biome.NewPlains(26, 255, seed),
+	}
 
 	return bg
 }
@@ -30,41 +35,34 @@ func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
 	for x := float32(0); x < world.ChunkWidth; x++ {
 		for z := float32(0); z < world.ChunkWidth; z++ {
 
-			ground := bg.noise.Eval2(x+chunk.Position().X, z+chunk.Position().Y)
+			sampleX := x + chunk.Position().X
+			sampleZ := z + chunk.Position().Y
+
+			ground := bg.noise.Eval2(sampleX, sampleZ)
 			ground = math32.Floor(ground)
 			ground = math32.Clamp(ground, 1, world.ChunkHeight-1)
 
-			for y := float32(0); y < world.ChunkHeight; y++ {
-				if y > ground && y > bg.waterLevel {
+			var localBiome biome.Biome
+			for _, b := range bg.biomes {
+				if b.Match(ground) {
+					localBiome = b
 					break
 				}
-				b := bg.getBlock(ground, x, y, z)
-				chunk.SetBlockAt(int(x), int(y), int(z), b)
+			}
+
+			if localBiome == nil {
+				continue
+			}
+
+			localBiome.SetGround(ground)
+
+			for y := float32(0); y < world.ChunkHeight; y++ {
+				if y == 0 {
+					chunk.SetBlockAtF(x, y, z, block.TypeBedrock)
+					continue
+				}
+				chunk.SetBlockAtF(x, y, z, localBiome.GetBlockAt(sampleX, y, sampleZ))
 			}
 		}
 	}
-}
-func (bg BiomeGenerator) getBlock(ground, x, y, z float32) uint16 {
-	if y == ground {
-		if y <= bg.waterLevel {
-			return block.TypeSand
-		}
-		return block.TypeGrass
-	}
-	if y < ground-2 {
-		return block.TypeStone
-	}
-
-	if y < ground {
-		if y <= bg.waterLevel {
-			return block.TypeSand
-		}
-		return block.TypeDirt
-	}
-
-	if y > ground && y < bg.waterLevel {
-		return block.TypeWater
-	}
-
-	return block.TypeNone
 }

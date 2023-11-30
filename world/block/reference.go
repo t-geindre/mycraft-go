@@ -42,5 +42,15 @@ func getReference() map[uint16]*Block {
 	ref[TypeDandelion] = NewBlock(TypeDandelion, KindPlant)
 	ref[TypeDandelion].SetMaterial(matRepo.Get(matRef.Dandelion), MaterialTop)
 
+	// GRAVEL
+	ref[TypeGravel] = NewBlock(TypeGravel, KindCube)
+	ref[TypeGravel].SetMaterial(matRepo.Get(matRef.Gravel), MaterialsCube...)
+
+	// SPRUCE LOG
+	ref[TypeSpruceLog] = NewBlock(TypeSpruceLog, KindCube)
+	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogTop), MaterialTop)
+	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogTop), MaterialBottom)
+	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogSide), MaterialsSides...)
+
 	return ref
 }

@@ -11,6 +11,8 @@ const (
 	TypeWater
 	TypeBedrock
 	TypeDandelion
+	TypeGravel
+	TypeSpruceLog
 )
 
 const (

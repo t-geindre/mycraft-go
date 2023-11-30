@@ -31,28 +31,12 @@ func NewQuad(position math32.Vector3, orientation uint8, material material.IMate
 	return q
 }
 
-func (q *Quad) Position() math32.Vector3 {
-	return q.position
-}
-
-func (q *Quad) SetPosition(position math32.Vector3) {
-	q.position = position
-}
-
 func (q *Quad) Orientation() uint8 {
 	return q.orientation
 }
 
 func (q *Quad) Material() material.IMaterial {
 	return q.material
-}
-
-func (q *Quad) Size() math32.Vector2 {
-	return q.size
-}
-
-func (q *Quad) SetSize(size math32.Vector2) {
-	q.size = size
 }
 
 func (q *Quad) Vertices() []float32 {

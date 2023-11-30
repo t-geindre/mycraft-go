@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const renderingDistance = 40 // chunks
+const renderingDistance = 30 // chunks
 
 type Game struct {
 	container      *core.Node
@@ -54,7 +54,7 @@ func (g *Game) Setup(container *core.Node, app *app.App) {
 
 	// Create world
 	// Rendering distance is increased by 1 to avoid chunks not being rendered
-	g.world = world.NewWorld(renderingDistance+1, generator.NewBiomeGenerator(0))
+	g.world = world.NewWorld(renderingDistance+5, generator.NewBiomeGenerator(0))
 
 	// Create world mesher
 	g.worldMesher = mesh.NewWorldMesher(renderingDistance*mesh.ChunkletSize, g.world)
