@@ -15,13 +15,13 @@ const (
 	Bedrock
 	Dandelion
 	Gravel
-	SpruceLogSide
-	SpruceLogTop
+	OakLogSide
+	OakSpruceLogTop
+	OakLeaves
 )
 
 type materialDef struct {
 	TextureFile string
-	Transparent bool
 	Setup       func(m *material.Standard)
 }
 
@@ -52,7 +52,6 @@ func materialReference() map[uint16]materialDef {
 	}
 
 	ref[BlockWater] = materialDef{
-		Transparent: true,
 		Setup: func(m *material.Standard) {
 			m.SetColor(&math32.Color{R: 0.2, G: 0.4, B: 0.8})
 			m.SetOpacity(0.8)
@@ -72,12 +71,20 @@ func materialReference() map[uint16]materialDef {
 		TextureFile: "assets/block/gravel.png",
 	}
 
-	ref[SpruceLogSide] = materialDef{
-		TextureFile: "assets/block/spruce_log.png",
+	ref[OakLogSide] = materialDef{
+		TextureFile: "assets/block/oak_log.png",
 	}
 
-	ref[SpruceLogTop] = materialDef{
-		TextureFile: "assets/block/spruce_log_top.png",
+	ref[OakSpruceLogTop] = materialDef{
+		TextureFile: "assets/block/oak_log_top.png",
+	}
+
+	ref[OakLeaves] = materialDef{
+		TextureFile: "assets/block/oak_leaves.png",
+		Setup: func(m *material.Standard) {
+			m.SetColor(&math32.Color{R: 0.66, G: 0.99, B: 0.59})
+			m.SetTransparent(true)
+		},
 	}
 
 	return ref

@@ -19,7 +19,7 @@ func (r *Repository) Get(id uint16) material.IMaterial {
 	if mat, ok := r.materials[id]; ok {
 		return mat
 	}
-	panic(fmt.Errorf(`unknown material "%s"`, id))
+	panic(fmt.Errorf(`unknown material "%d"`, id))
 }
 
 func (r *Repository) getTexture(file string) *texture.Texture2D {

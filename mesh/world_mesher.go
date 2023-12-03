@@ -5,7 +5,6 @@ import (
 	"github.com/g3n/engine/math32"
 	"mycraft/world"
 	"sort"
-	"time"
 )
 
 type WorldMesher struct {
@@ -71,7 +70,6 @@ func (wm *WorldMesher) Run() {
 			wm.lastPos = &pos
 			wm.doUpdate(pos)
 		default:
-			time.Sleep(1 * time.Millisecond)
 		}
 	}
 }

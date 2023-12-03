@@ -23,7 +23,8 @@ const chunkChanPackSize = 10
 func NewWorld(rd float32, generator Generator) *World {
 	w := new(World)
 	w.chunks = make(map[math32.Vector2]*Chunk)
-	w.rDist = rd
+	// Render distance increased to be able to apply mod before meshing
+	w.rDist = rd + 5
 	w.generator = generator
 	w.posChan = make(chan math32.Vector2, 1)
 	w.addChunkChan = make(chan []*Chunk, 1)

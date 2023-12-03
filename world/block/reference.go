@@ -47,10 +47,15 @@ func getReference() map[uint16]*Block {
 	ref[TypeGravel].SetMaterial(matRepo.Get(matRef.Gravel), MaterialsCube...)
 
 	// SPRUCE LOG
-	ref[TypeSpruceLog] = NewBlock(TypeSpruceLog, KindCube)
-	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogTop), MaterialTop)
-	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogTop), MaterialBottom)
-	ref[TypeSpruceLog].SetMaterial(matRepo.Get(matRef.SpruceLogSide), MaterialsSides...)
+	ref[TypeOakLog] = NewBlock(TypeOakLog, KindCube)
+	ref[TypeOakLog].SetMaterial(matRepo.Get(matRef.OakSpruceLogTop), MaterialTop)
+	ref[TypeOakLog].SetMaterial(matRepo.Get(matRef.OakSpruceLogTop), MaterialBottom)
+	ref[TypeOakLog].SetMaterial(matRepo.Get(matRef.OakLogSide), MaterialsSides...)
+
+	// OAK LEAVES
+	ref[TypeOakLeaves] = NewBlock(TypeOakLeaves, KindCube)
+	ref[TypeOakLeaves].SetMaterial(matRepo.Get(matRef.OakLeaves), MaterialsCube...)
+	ref[TypeOakLeaves].SetTransparent(true)
 
 	return ref
 }

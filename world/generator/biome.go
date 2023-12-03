@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"github.com/g3n/engine/math32"
 	"mycraft/world"
 	"mycraft/world/block"
 	"mycraft/world/generator/biome"
@@ -18,9 +17,11 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg := new(BiomeGenerator)
 
 	bg.noise = normalized.NewSimplexNoise(seed)
-	bg.noise = noise.NewOctave(bg.noise, 2, 0.7, 5)
-	bg.noise = noise.NewScale(bg.noise, 600)
-	bg.noise = noise.NewAmplify(bg.noise, 60)
+	bg.noise = noise.NewOctave(bg.noise, 2.1, 0.7, 5)
+	bg.noise = noise.NewScale(bg.noise, 1600)
+	bg.noise = noise.NewAmplify(bg.noise, 70)
+	bg.noise = noise.NewFloor(bg.noise)
+	bg.noise = noise.NewClamp(bg.noise, 1, world.ChunkHeight-1)
 
 	bg.biomes = []biome.Biome{
 		biome.NewWater(1, 25),
@@ -34,13 +35,10 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
 	for x := float32(0); x < world.ChunkWidth; x++ {
 		for z := float32(0); z < world.ChunkWidth; z++ {
-
 			sampleX := x + chunk.Position().X
 			sampleZ := z + chunk.Position().Y
 
 			ground := bg.noise.Eval2(sampleX, sampleZ)
-			ground = math32.Floor(ground)
-			ground = math32.Clamp(ground, 1, world.ChunkHeight-1)
 
 			var localBiome biome.Biome
 			for _, b := range bg.biomes {

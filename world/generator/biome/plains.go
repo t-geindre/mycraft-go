@@ -1,7 +1,6 @@
 package biome
 
 import (
-	"github.com/g3n/engine/math32"
 	"mycraft/world/block"
 	"mycraft/world/generator/noise"
 	"mycraft/world/generator/noise/normalized"
@@ -20,7 +19,7 @@ func NewPlains(rangeFrom, rangeTo float32, seed int64) *Plains {
 	p.rangeTo = rangeTo
 
 	p.treeNoise = normalized.NewSimplexNoise(seed)
-	p.treeNoise = noise.NewScale(p.treeNoise, 1)
+	p.treeNoise = noise.NewScale(p.treeNoise, 2)
 	p.treeNoise = noise.NewAmplify(p.treeNoise, 100)
 
 	return p
@@ -56,14 +55,13 @@ func (p *Plains) getGroundBlockAt(x, y, z float32) uint16 {
 }
 
 func (p *Plains) getTreeBlockAt(x, y, z float32) uint16 {
-	treeSpawn := math32.Round(p.treeNoise.Eval2(x, z))
+	treeSpawn := p.treeNoise.Eval2(x, z)
 	trunk := float32(0)
-	switch treeSpawn {
-	case 100:
-		trunk = 6
+	if treeSpawn > 99 {
+		trunk = 4
 	}
 	if y > p.ground && y < p.ground+trunk && trunk > 0 {
-		return block.TypeSpruceLog
+		return block.TypeOakLeaves
 	}
 
 	return block.TypeNone

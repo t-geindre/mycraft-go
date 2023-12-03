@@ -7,4 +7,9 @@ build:
 
 run: build
 	bin/${MODULE_NAME}
-	
+
+test:
+	go test -v ./...
+
+quality:
+	go vet ./...

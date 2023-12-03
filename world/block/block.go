@@ -12,7 +12,8 @@ const (
 	TypeBedrock
 	TypeDandelion
 	TypeGravel
-	TypeSpruceLog
+	TypeOakLog
+	TypeOakLeaves
 )
 
 const (

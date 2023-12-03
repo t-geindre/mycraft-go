@@ -14,7 +14,7 @@ func (r *Repository) Get(id uint16) *Block {
 	if block, ok := r.blocks[id]; ok {
 		return block
 	}
-	panic(fmt.Errorf(`unknown block "%s"`, id))
+	panic(fmt.Errorf(`unknown block "%d"`, id))
 }
 
 func newRepository() *Repository {
