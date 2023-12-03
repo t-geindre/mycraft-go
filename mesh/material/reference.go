@@ -31,7 +31,7 @@ func materialReference() map[uint16]materialDef {
 	ref[BlockGrassTop] = materialDef{
 		TextureFile: "assets/block/grass_block_top.png",
 		Setup: func(m *material.Standard) {
-			m.SetColor(&math32.Color{R: 0.66, G: 0.99, B: 0.59})
+			m.SetColor(&math32.Color{R: 0.49, G: 0.74, B: 0.42})
 		},
 	}
 

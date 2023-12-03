@@ -1,8 +1,10 @@
 package biome
 
 import (
+	"math/rand"
 	"mycraft/world/block"
 	"mycraft/world/chunk"
+	"mycraft/world/generator/mod"
 )
 
 type Plains struct {
@@ -34,4 +36,11 @@ func (p *Plains) getBlockAt(ground, x, y, z float32) uint8 {
 	}
 
 	return block.TypeNone
+}
+
+func (p *Plains) GetMod(ground, x, z float32) mod.Mod {
+	if rand.Intn(50) == 25 {
+		return mod.NewOakTree(8, 3, x, ground+1, z)
+	}
+	return nil
 }

@@ -7,5 +7,6 @@ import (
 
 type Mod interface {
 	Apply(chunk *chunk.Chunk)
-	GetBounds() math32.Vector4
+	GetBounds() *math32.Vector4
+	IsEmpty() bool
 }

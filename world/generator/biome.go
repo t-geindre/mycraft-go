@@ -47,6 +47,10 @@ func (bg BiomeGenerator) Populate(chk *chunk.Chunk) []*mod.Mod {
 			}
 
 			localBiome.FillGround(chk, ground, x, z)
+			localMod := localBiome.GetMod(ground, x, z)
+			if localMod != nil {
+				localMod.Apply(chk)
+			}
 			chk.SetBlockAtF(x, 0, z, block.TypeBedrock)
 		}
 	}

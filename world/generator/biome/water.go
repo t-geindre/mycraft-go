@@ -3,6 +3,7 @@ package biome
 import (
 	"mycraft/world/block"
 	"mycraft/world/chunk"
+	"mycraft/world/generator/mod"
 )
 
 type Water struct {
@@ -41,4 +42,8 @@ func (w *Water) getBlockAt(ground, x, y, z float32) uint8 {
 	}
 
 	return block.TypeSand
+}
+
+func (w *Water) GetMod(ground, x, z float32) mod.Mod {
+	return nil
 }

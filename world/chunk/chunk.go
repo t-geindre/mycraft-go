@@ -64,3 +64,7 @@ func (c *Chunk) IsLayerEmpty(l int) bool {
 	_, ok := c.filledLayers[l]
 	return !ok
 }
+
+func (c *Chunk) InBounds(x, y, z float32) bool {
+	return x >= c.position.X && x < c.position.X+Width && y >= 0 && y < Height && z >= c.position.Y && z < c.position.Y+Depth
+}
