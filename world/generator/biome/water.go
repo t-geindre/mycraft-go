@@ -24,7 +24,7 @@ func (w *Water) Match(ground float32) bool {
 	return ground >= w.rangeFrom && ground <= w.rangeTo
 }
 
-func (w *Water) GetBlockAt(x, y, z float32) uint16 {
+func (w *Water) GetBlockAt(x, y, z float32) uint8 {
 	if y > w.rangeTo {
 		return block.TypeNone
 	}

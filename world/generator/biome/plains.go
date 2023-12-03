@@ -33,7 +33,7 @@ func (p *Plains) Match(level float32) bool {
 	return level >= p.rangeFrom && level <= p.rangeTo
 }
 
-func (p *Plains) GetBlockAt(x, y, z float32) uint16 {
+func (p *Plains) GetBlockAt(x, y, z float32) uint8 {
 	treeBlock := p.getTreeBlockAt(x, y, z)
 	if treeBlock != block.TypeNone {
 		return treeBlock
@@ -42,7 +42,7 @@ func (p *Plains) GetBlockAt(x, y, z float32) uint16 {
 	return p.getGroundBlockAt(x, y, z)
 }
 
-func (p *Plains) getGroundBlockAt(x, y, z float32) uint16 {
+func (p *Plains) getGroundBlockAt(x, y, z float32) uint8 {
 	if y == p.ground {
 		return block.TypeGrass
 	}
@@ -54,7 +54,7 @@ func (p *Plains) getGroundBlockAt(x, y, z float32) uint16 {
 	return block.TypeNone
 }
 
-func (p *Plains) getTreeBlockAt(x, y, z float32) uint16 {
+func (p *Plains) getTreeBlockAt(x, y, z float32) uint8 {
 	treeSpawn := p.treeNoise.Eval2(x, z)
 	trunk := float32(0)
 	if treeSpawn > 99 {

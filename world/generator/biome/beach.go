@@ -24,7 +24,7 @@ func (b *Beach) Match(level float32) bool {
 	return level >= b.rangeFrom && level <= b.rangeTo
 }
 
-func (b *Beach) GetBlockAt(x, y, z float32) uint16 {
+func (b *Beach) GetBlockAt(x, y, z float32) uint8 {
 	if y == b.ground {
 		return block.TypeSand
 	}

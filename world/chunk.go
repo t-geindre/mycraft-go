@@ -9,7 +9,7 @@ const ChunkDepth = 16
 const ChunkHeight = 256
 
 type Chunk struct {
-	blocks       [ChunkWidth][ChunkHeight][ChunkDepth]uint16
+	blocks       [ChunkWidth][ChunkHeight][ChunkDepth]uint8
 	position     *math32.Vector2
 	size         *math32.Vector3
 	isEmpty      bool
@@ -33,16 +33,16 @@ func (c *Chunk) Position() *math32.Vector2 {
 	return c.position
 }
 
-func (c *Chunk) SetBlockAtF(x, y, z float32, b uint16) {
+func (c *Chunk) SetBlockAtF(x, y, z float32, b uint8) {
 	c.SetBlockAt(int(x), int(y), int(z), b)
 }
 
-func (c *Chunk) SetBlockAt(x, y, z int, b uint16) {
+func (c *Chunk) SetBlockAt(x, y, z int, b uint8) {
 	c.filledLayers[y] = true
 	c.blocks[x][y][z] = b
 }
 
-func (c *Chunk) GetBlockAt(x, y, z int) uint16 {
+func (c *Chunk) GetBlockAt(x, y, z int) uint8 {
 	return c.blocks[x][y][z]
 }
 

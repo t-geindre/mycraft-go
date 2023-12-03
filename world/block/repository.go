@@ -5,12 +5,12 @@ import (
 )
 
 type Repository struct {
-	blocks map[uint16]*Block
+	blocks map[uint8]*Block
 }
 
 var RepositoryInstance *Repository
 
-func (r *Repository) Get(id uint16) *Block {
+func (r *Repository) Get(id uint8) *Block {
 	if block, ok := r.blocks[id]; ok {
 		return block
 	}

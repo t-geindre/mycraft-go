@@ -4,12 +4,12 @@ import (
 	matRef "mycraft/mesh/material"
 )
 
-func getReference() map[uint16]*Block {
-	ref := make(map[uint16]*Block)
+func getReference() map[uint8]*Block {
+	ref := make(map[uint8]*Block)
 	matRepo := matRef.GetRepository()
 
-	MaterialsSides := []uint16{MaterialNorth, MaterialSouth, MaterialEast, MaterialWest}
-	MaterialsCube := append([]uint16{MaterialTop, MaterialBottom}, MaterialsSides...)
+	MaterialsSides := []uint8{MaterialNorth, MaterialSouth, MaterialEast, MaterialWest}
+	MaterialsCube := append([]uint8{MaterialTop, MaterialBottom}, MaterialsSides...)
 
 	// GRASS
 	ref[TypeGrass] = NewBlock(TypeGrass, KindCube)
