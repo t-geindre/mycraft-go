@@ -1,9 +1,10 @@
 package generator
 
 import (
-	"mycraft/world"
 	"mycraft/world/block"
+	"mycraft/world/chunk"
 	"mycraft/world/generator/biome"
+	"mycraft/world/generator/mod"
 	"mycraft/world/generator/noise"
 	"mycraft/world/generator/noise/normalized"
 )
@@ -22,7 +23,7 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg.elevationNoise = noise.NewScale(bg.elevationNoise, 1600)
 	bg.elevationNoise = noise.NewAmplify(bg.elevationNoise, 70)
 	bg.elevationNoise = noise.NewFloor(bg.elevationNoise)
-	bg.elevationNoise = noise.NewClamp(bg.elevationNoise, 1, world.ChunkHeight-1)
+	bg.elevationNoise = noise.NewClamp(bg.elevationNoise, 1, chunk.Height-1)
 
 	bg.biomes = biome.NewSelector()
 	bg.biomes.Add(biome.NewWater(25), 1, 25)
@@ -32,11 +33,11 @@ func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	return bg
 }
 
-func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
-	for x := float32(0); x < world.ChunkWidth; x++ {
-		for z := float32(0); z < world.ChunkWidth; z++ {
-			sampleX := x + chunk.Position().X
-			sampleZ := z + chunk.Position().Y
+func (bg BiomeGenerator) Populate(chk *chunk.Chunk) []*mod.Mod {
+	for x := float32(0); x < chunk.Width; x++ {
+		for z := float32(0); z < chunk.Width; z++ {
+			sampleX := x + chk.Position().X
+			sampleZ := z + chk.Position().Y
 
 			ground := bg.elevationNoise.Eval2(sampleX, sampleZ)
 
@@ -45,8 +46,10 @@ func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
 				continue
 			}
 
-			localBiome.FillGround(chunk, ground, x, z)
-			chunk.SetBlockAtF(x, 0, z, block.TypeBedrock)
+			localBiome.FillGround(chk, ground, x, z)
+			chk.SetBlockAtF(x, 0, z, block.TypeBedrock)
 		}
 	}
+
+	return nil
 }

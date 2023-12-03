@@ -4,11 +4,12 @@ import (
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/math32"
 	"mycraft/world"
+	"mycraft/world/chunk"
 	"sort"
 )
 
 type WorldMesher struct {
-	chunks            map[math32.Vector2]*world.Chunk
+	chunks            map[math32.Vector2]*chunk.Chunk
 	meshes            map[math32.Vector3]*Chunklet
 	world             *world.World
 	renderDistance    float32 // chunks horizontal, chunklet vertical
@@ -30,7 +31,7 @@ const (
 func NewWorldMesher(rd float32, w *world.World) *WorldMesher {
 	wm := new(WorldMesher)
 
-	wm.chunks = make(map[math32.Vector2]*world.Chunk)
+	wm.chunks = make(map[math32.Vector2]*chunk.Chunk)
 	wm.meshes = make(map[math32.Vector3]*Chunklet)
 
 	wm.positionChannel = make(chan math32.Vector3, 1)
@@ -115,10 +116,10 @@ MeshLoop:
 	for _, meshPos := range wm.getMissingMeshesPos(pos) {
 		requiredChunks := [...]math32.Vector2{
 			chunkCenter: {X: meshPos.X, Y: meshPos.Z},
-			chunkEast:   {X: meshPos.X + world.ChunkWidth, Y: meshPos.Z},
-			chunkWest:   {X: meshPos.X - world.ChunkWidth, Y: meshPos.Z},
-			chunkNorth:  {X: meshPos.X, Y: meshPos.Z + world.ChunkDepth},
-			chunkSouth:  {X: meshPos.X, Y: meshPos.Z - world.ChunkDepth},
+			chunkEast:   {X: meshPos.X + chunk.Width, Y: meshPos.Z},
+			chunkWest:   {X: meshPos.X - chunk.Width, Y: meshPos.Z},
+			chunkNorth:  {X: meshPos.X, Y: meshPos.Z + chunk.Depth},
+			chunkSouth:  {X: meshPos.X, Y: meshPos.Z - chunk.Depth},
 		}
 
 		for _, chunkPos := range requiredChunks {
@@ -150,19 +151,19 @@ func (wm *WorldMesher) Container() *core.Node {
 	return wm.container
 }
 
-func (wm *WorldMesher) AddChunk(chunk *world.Chunk) {
+func (wm *WorldMesher) AddChunk(chunk *chunk.Chunk) {
 	wm.chunks[*chunk.Position()] = chunk
 }
 
-func (wm *WorldMesher) RemoveChunk(chunk *world.Chunk) {
+func (wm *WorldMesher) RemoveChunk(chunk *chunk.Chunk) {
 	delete(wm.chunks, *chunk.Position())
 }
 
 func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 {
 	missing := make([]math32.Vector3, 0, 100)
-	for x := pos.X - wm.renderDistance; x <= pos.X+wm.renderDistance; x += world.ChunkWidth {
-		for z := pos.Z - wm.renderDistance; z <= pos.Z+wm.renderDistance; z += world.ChunkDepth {
-			for y := math32.Max(0, pos.Y-wm.renderDistance); y < math32.Min(pos.Y+wm.renderDistance, world.ChunkHeight); y += ChunkletSize {
+	for x := pos.X - wm.renderDistance; x <= pos.X+wm.renderDistance; x += chunk.Width {
+		for z := pos.Z - wm.renderDistance; z <= pos.Z+wm.renderDistance; z += chunk.Depth {
+			for y := math32.Max(0, pos.Y-wm.renderDistance); y < math32.Min(pos.Y+wm.renderDistance, chunk.Height); y += ChunkletSize {
 				newPos := math32.Vector3{X: x, Y: y, Z: z}
 				if newPos.DistanceToSquared(&pos) > wm.renderDistance*wm.renderDistance {
 					continue
@@ -184,9 +185,9 @@ func (wm *WorldMesher) getMissingMeshesPos(pos math32.Vector3) []math32.Vector3 
 
 func (wm *WorldMesher) getWorldPosition(pos math32.Vector3) math32.Vector3 {
 	return math32.Vector3{
-		X: math32.Floor(pos.X/world.ChunkWidth) * world.ChunkWidth,
+		X: math32.Floor(pos.X/chunk.Width) * chunk.Width,
 		Y: math32.Floor(pos.Y/ChunkletSize) * ChunkletSize,
-		Z: math32.Floor(pos.Z/world.ChunkDepth) * world.ChunkDepth,
+		Z: math32.Floor(pos.Z/chunk.Depth) * chunk.Depth,
 	}
 }
 

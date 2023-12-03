@@ -1,4 +1,4 @@
-package world
+package chunk
 
 import (
 	"github.com/g3n/engine/math32"
@@ -6,8 +6,8 @@ import (
 )
 
 func TestChunk_IsLayerEmpty(t *testing.T) {
-	allEmpty := make(map[int]bool, ChunkHeight)
-	for i := 0; i < ChunkHeight; i++ {
+	allEmpty := make(map[int]bool, Height)
+	for i := 0; i < Height; i++ {
 		allEmpty[i] = true
 	}
 

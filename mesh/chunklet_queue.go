@@ -2,7 +2,7 @@ package mesh
 
 import (
 	"github.com/g3n/engine/math32"
-	"mycraft/world"
+	"mycraft/world/chunk"
 )
 
 type ChunkletQueue struct {
@@ -16,11 +16,11 @@ type ChunkletQueue struct {
 
 type ChunkletQuery struct {
 	Pos    math32.Vector3
-	Center *world.Chunk
-	East   *world.Chunk
-	West   *world.Chunk
-	North  *world.Chunk
-	South  *world.Chunk
+	Center *chunk.Chunk
+	East   *chunk.Chunk
+	West   *chunk.Chunk
+	North  *chunk.Chunk
+	South  *chunk.Chunk
 }
 
 func NewChunkletQueue(packSize int, routines int, handler func(*Chunklet)) *ChunkletQueue {

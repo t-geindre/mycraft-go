@@ -5,8 +5,8 @@ import (
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/material"
 	"github.com/g3n/engine/math32"
-	"mycraft/world"
 	"mycraft/world/block"
+	"mycraft/world/chunk"
 )
 
 const ChunkletSize = 16
@@ -16,16 +16,16 @@ type Chunklet struct {
 	*geometry.Geometry
 	materialMap map[material.IMaterial]int
 	repository  *block.Repository
-	chunk       *world.Chunk
-	chunkEast   *world.Chunk
-	chunkWest   *world.Chunk
-	chunkNorth  *world.Chunk
-	chunkSouth  *world.Chunk
+	chunk       *chunk.Chunk
+	chunkEast   *chunk.Chunk
+	chunkWest   *chunk.Chunk
+	chunkNorth  *chunk.Chunk
+	chunkSouth  *chunk.Chunk
 	yIndex      float32
 	quads       []*Quad
 }
 
-func NewChunkletGeometry(chunk, east, west, north, south *world.Chunk, index float32) (*geometry.Geometry, map[material.IMaterial]int) {
+func NewChunkletGeometry(chunk, east, west, north, south *chunk.Chunk, index float32) (*geometry.Geometry, map[material.IMaterial]int) {
 	if chunk.AreLayersEmpty(int(index), int(index)+ChunkletSize) {
 		return nil, nil
 	}
@@ -181,7 +181,7 @@ func (c *Chunklet) getBlock(x, y, z float32) *block.Block {
 	return c.getBlockAt(c.chunk, x, y, z)
 }
 
-func (c *Chunklet) getBlockAt(chunk *world.Chunk, x, y, z float32) *block.Block {
+func (c *Chunklet) getBlockAt(chunk *chunk.Chunk, x, y, z float32) *block.Block {
 	b := chunk.GetBlockAt(int(x), int(y), int(z))
 	if b == block.TypeNone {
 		return nil

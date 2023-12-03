@@ -1,8 +1,9 @@
 package generator
 
 import (
-	"mycraft/world"
 	"mycraft/world/block"
+	"mycraft/world/chunk"
+	"mycraft/world/generator/mod"
 	"mycraft/world/generator/noise"
 )
 
@@ -19,20 +20,22 @@ func NewSimpleGenerator(baseNoise noise.Noise, waterLevel float32) *Simple {
 	return s
 }
 
-func (s *Simple) Populate(chunk *world.Chunk) {
-	for x := float32(0); x < world.ChunkWidth; x++ {
-		for z := float32(0); z < world.ChunkWidth; z++ {
-			sampleX := x + chunk.Position().X
-			sampleZ := z + chunk.Position().Y
-			for y := float32(0); y < world.ChunkHeight; y++ {
+func (s *Simple) Populate(chk *chunk.Chunk) []*mod.Mod {
+	for x := float32(0); x < chunk.Width; x++ {
+		for z := float32(0); z < chunk.Width; z++ {
+			sampleX := x + chk.Position().X
+			sampleZ := z + chk.Position().Y
+			for y := float32(0); y < chunk.Height; y++ {
 				if y == 0 {
-					chunk.SetBlockAtF(x, y, z, block.TypeBedrock)
+					chk.SetBlockAtF(x, y, z, block.TypeBedrock)
 					continue
 				}
-				chunk.SetBlockAtF(x, y, z, s.getBlockAt(sampleX, y, sampleZ))
+				chk.SetBlockAtF(x, y, z, s.getBlockAt(sampleX, y, sampleZ))
 			}
 		}
 	}
+
+	return nil
 }
 
 func (s *Simple) getBlockAt(x, y, z float32) uint8 {

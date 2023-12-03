@@ -1,8 +1,8 @@
 package biome
 
 import (
-	"mycraft/world"
 	"mycraft/world/block"
+	"mycraft/world/chunk"
 )
 
 type Water struct {
@@ -16,7 +16,7 @@ func NewWater(waterLvl float32) *Water {
 	return w
 }
 
-func (w *Water) FillGround(chunk *world.Chunk, ground, x, z float32) {
+func (w *Water) FillGround(chunk *chunk.Chunk, ground, x, z float32) {
 	for y := w.waterLvl; y > 0; y-- {
 		chunk.SetBlockAtF(x, y, z, w.getBlockAt(ground, x, y, z))
 	}

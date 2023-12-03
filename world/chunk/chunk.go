@@ -1,15 +1,15 @@
-package world
+package chunk
 
 import (
 	"github.com/g3n/engine/math32"
 )
 
-const ChunkWidth = 16
-const ChunkDepth = 16
-const ChunkHeight = 256
+const Width = 16
+const Depth = 16
+const Height = 256
 
 type Chunk struct {
-	blocks       [ChunkWidth][ChunkHeight][ChunkDepth]uint8
+	blocks       [Width][Height][Depth]uint8
 	position     *math32.Vector2
 	size         *math32.Vector3
 	isEmpty      bool
@@ -20,11 +20,11 @@ func NewChunk(pos math32.Vector2) *Chunk {
 	c := new(Chunk)
 	c.position = &pos
 	c.size = &math32.Vector3{
-		X: ChunkWidth,
-		Y: ChunkHeight,
-		Z: ChunkDepth,
+		X: Width,
+		Y: Height,
+		Z: Depth,
 	}
-	c.filledLayers = make(map[int]bool, ChunkHeight)
+	c.filledLayers = make(map[int]bool, Height)
 
 	return c
 }

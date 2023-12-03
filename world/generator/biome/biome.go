@@ -1,7 +1,9 @@
 package biome
 
-import "mycraft/world"
+import (
+	"mycraft/world/chunk"
+)
 
 type Biome interface {
-	FillGround(chunk *world.Chunk, ground, x, z float32)
+	FillGround(chunk *chunk.Chunk, ground, x, z float32)
 }
