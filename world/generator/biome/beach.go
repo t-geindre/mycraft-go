@@ -1,37 +1,29 @@
 package biome
 
-import "mycraft/world/block"
+import (
+	"mycraft/world"
+	"mycraft/world/block"
+)
 
 type Beach struct {
-	rangeFrom float32
-	rangeTo   float32
-	ground    float32
 }
 
-func NewBeach(rangeFrom, rangeTo float32) *Beach {
+func NewBeach() *Beach {
 	b := new(Beach)
-	b.rangeFrom = rangeFrom
-	b.rangeTo = rangeTo
 
 	return b
 }
 
-func (b *Beach) SetGround(level float32) {
-	b.ground = level
-}
-
-func (b *Beach) Match(level float32) bool {
-	return level >= b.rangeFrom && level <= b.rangeTo
-}
-
-func (b *Beach) GetBlockAt(x, y, z float32) uint8 {
-	if y == b.ground {
-		return block.TypeSand
+func (b *Beach) FillGround(chunk *world.Chunk, ground, x, z float32) {
+	for y := float32(0); y <= ground; y++ {
+		chunk.SetBlockAtF(x, y, z, b.getBlockAt(ground, x, y, z))
 	}
+}
 
-	if y < b.ground {
+func (b *Beach) getBlockAt(ground, x, y, z float32) uint8 {
+	if y < ground-10 {
 		return block.TypeStone
 	}
 
-	return block.TypeNone
+	return block.TypeSand
 }

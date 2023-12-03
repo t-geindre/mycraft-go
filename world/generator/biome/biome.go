@@ -1,7 +1,7 @@
 package biome
 
+import "mycraft/world"
+
 type Biome interface {
-	Match(level float32) bool
-	SetGround(level float32)
-	GetBlockAt(x, y, z float32) uint8
+	FillGround(chunk *world.Chunk, ground, x, z float32)
 }

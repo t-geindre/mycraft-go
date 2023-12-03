@@ -9,25 +9,25 @@ import (
 )
 
 type BiomeGenerator struct {
-	noise  noise.Noise
-	biomes []biome.Biome
+	elevationNoise noise.Noise
+	biomeNoise     noise.Noise
+	biomes         *biome.Selector
 }
 
 func NewBiomeGenerator(seed int64) *BiomeGenerator {
 	bg := new(BiomeGenerator)
 
-	bg.noise = normalized.NewSimplexNoise(seed)
-	bg.noise = noise.NewOctave(bg.noise, 2.1, 0.7, 5)
-	bg.noise = noise.NewScale(bg.noise, 1600)
-	bg.noise = noise.NewAmplify(bg.noise, 70)
-	bg.noise = noise.NewFloor(bg.noise)
-	bg.noise = noise.NewClamp(bg.noise, 1, world.ChunkHeight-1)
+	bg.elevationNoise = normalized.NewSimplexNoise(seed)
+	bg.elevationNoise = noise.NewOctave(bg.elevationNoise, 2.1, 0.7, 5)
+	bg.elevationNoise = noise.NewScale(bg.elevationNoise, 1600)
+	bg.elevationNoise = noise.NewAmplify(bg.elevationNoise, 70)
+	bg.elevationNoise = noise.NewFloor(bg.elevationNoise)
+	bg.elevationNoise = noise.NewClamp(bg.elevationNoise, 1, world.ChunkHeight-1)
 
-	bg.biomes = []biome.Biome{
-		biome.NewWater(1, 25),
-		biome.NewBeach(26, 26),
-		biome.NewPlains(26, 255, seed),
-	}
+	bg.biomes = biome.NewSelector()
+	bg.biomes.Add(biome.NewWater(25), 1, 25)
+	bg.biomes.Add(biome.NewBeach(), 26, 26)
+	bg.biomes.Add(biome.NewPlains(), 26, 255)
 
 	return bg
 }
@@ -38,29 +38,15 @@ func (bg BiomeGenerator) Populate(chunk *world.Chunk) {
 			sampleX := x + chunk.Position().X
 			sampleZ := z + chunk.Position().Y
 
-			ground := bg.noise.Eval2(sampleX, sampleZ)
+			ground := bg.elevationNoise.Eval2(sampleX, sampleZ)
 
-			var localBiome biome.Biome
-			for _, b := range bg.biomes {
-				if b.Match(ground) {
-					localBiome = b
-					break
-				}
-			}
-
+			localBiome := bg.biomes.Match(ground)
 			if localBiome == nil {
 				continue
 			}
 
-			localBiome.SetGround(ground)
-
-			for y := float32(0); y < world.ChunkHeight; y++ {
-				if y == 0 {
-					chunk.SetBlockAtF(x, y, z, block.TypeBedrock)
-					continue
-				}
-				chunk.SetBlockAtF(x, y, z, localBiome.GetBlockAt(sampleX, y, sampleZ))
-			}
+			localBiome.FillGround(chunk, ground, x, z)
+			chunk.SetBlockAtF(x, 0, z, block.TypeBedrock)
 		}
 	}
 }

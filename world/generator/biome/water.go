@@ -1,43 +1,41 @@
 package biome
 
-import "mycraft/world/block"
+import (
+	"mycraft/world"
+	"mycraft/world/block"
+)
 
 type Water struct {
-	rangeFrom float32
-	rangeTo   float32
-	ground    float32
+	waterLvl float32
 }
 
-func NewWater(rangeFrom, rangeTo float32) *Water {
+func NewWater(waterLvl float32) *Water {
 	w := new(Water)
-	w.rangeFrom = rangeFrom
-	w.rangeTo = rangeTo
+	w.waterLvl = waterLvl
 
 	return w
 }
 
-func (w *Water) SetGround(ground float32) {
-	w.ground = ground
+func (w *Water) FillGround(chunk *world.Chunk, ground, x, z float32) {
+	for y := w.waterLvl; y > 0; y-- {
+		chunk.SetBlockAtF(x, y, z, w.getBlockAt(ground, x, y, z))
+	}
 }
 
-func (w *Water) Match(ground float32) bool {
-	return ground >= w.rangeFrom && ground <= w.rangeTo
-}
-
-func (w *Water) GetBlockAt(x, y, z float32) uint8 {
-	if y > w.rangeTo {
+func (w *Water) getBlockAt(ground, x, y, z float32) uint8 {
+	if y > w.waterLvl {
 		return block.TypeNone
 	}
 
-	if y > w.ground {
+	if y > ground {
 		return block.TypeWater
 	}
 
-	if y == w.ground {
-		if w.rangeTo-w.ground > 10 {
+	if y == ground {
+		if w.waterLvl-ground > 10 {
 			return block.TypeGravel
 		}
-		if w.rangeTo+1 == w.ground {
+		if w.waterLvl+1 == ground {
 			return block.TypeWater
 		}
 	}
